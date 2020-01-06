@@ -1,7 +1,7 @@
 #include <string>
 struct MMU
 {
-	char bios[0x100]; //outside for as originally overriden by ROM
+	char bios[0x100]; //outside as originally overridden by ROM
 	struct {
 		union {
 			char memory[0x1000];
@@ -22,6 +22,7 @@ struct MMU
 	void loadBios(MMU* mmu, std::string filePath);
 	char readBios8(MMU* mmu, char addr);
 	void writeBios8(MMU* mmu, char addr, char data);
+	void writeBios16(MMU* mmu, char16_t addr, char16_t data);
 	char16_t readBios16(MMU* mmu, char addr);
 	char16_t readMemory16(MMU* mmu, char16_t addr);
 	void writeMemory16(MMU* mmu, char16_t addr, char16_t data);

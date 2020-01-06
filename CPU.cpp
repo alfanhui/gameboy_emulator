@@ -1,14 +1,14 @@
-#include "CPU.h"
 #include <iostream>
 #include <string>
+#include "CPU.h"
+#include "MMU.h"
 
-CPU::CPU(){}
 
-void CPU::run_instruction(std::string type, unsigned char instruction)
+void CPU::runInstruction()
 {
-	//std::cout << (std::string)type << " : " << (int)instruction << std::endl;
 
-	//if (instruction == 0xfa) {
-	//	std::cout << "success!" << std::endl;
-	//}
+}
+
+void CPU::destroyCpu(CPU* cpu) {
+	delete cpu;
 }
