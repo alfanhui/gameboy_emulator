@@ -1,13 +1,2 @@
-﻿  CPU.cpp
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\MMU.h(3,1): error C2011: 'MMU': 'struct' type redefinition
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\MMU.h(2): message : see declaration of 'MMU'
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(7,15): error C2027: use of undefined type 'MMU'
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\MMU.h(2): message : see declaration of 'MMU'
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(8,5): error C2027: use of undefined type 'MMU'
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\MMU.h(2): message : see declaration of 'MMU'
-  GameBoyEmulator.cpp
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\MMU.h(3,1): error C2011: 'MMU': 'struct' type redefinition
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\MMU.h(2): message : see declaration of 'MMU'
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\GameBoyEmulator.cpp(17,5): error C2065: 'mmu': undeclared identifier
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\GameBoyEmulator.cpp(17,18): error C2065: 'mmu': undeclared identifier
-  Generating Code...
+﻿  GameBoyEmulator.cpp
+  GameBoyEmulator.vcxproj -> C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\x64\Debug\GameBoyEmulator.exe

@@ -1,7 +1,7 @@
 #include <string>
 struct MMU
 {
-	char bios[0x100]; //outside as originally overridden by ROM
+	char bios[0x100]; //outside but originally overridden by ROM
 	struct {
 		union {
 			char memory[0x1000];

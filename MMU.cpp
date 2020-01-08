@@ -22,7 +22,7 @@ void MMU::loadBios(MMU* mmu, std::string filePath) {
 			throw mmuException;
 		}
 	} catch (std::exception & e) {
-		std::cout << e.what() << "Not expect bios size (256).";
+		std::cout << e.what() << "Not expected bios size (256).";
 	}
 	std::cout << "BIOS Loaded.\n";
 }
