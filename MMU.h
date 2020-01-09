@@ -1,30 +1,30 @@
 #include <string>
 struct MMU
 {
-	char bios[0x100]; //outside but originally overridden by ROM
+	uint8_t bios[0x100]; //outside but originally overridden by ROM
 	struct {
 		union {
-			char memory[0x1000];
+			uint8_t memory[0x1000];
 			struct {
-				char rom[0x8000];
-				char videoRam[0x2000];
-				char externalRam[0x2000];
-				char Ram[0x2000];
-				char echoRam[0x1E00];
-				char oamRam[0xA0];
-				char space[0x60];
-				char iO[0x80];
-				char hRam[0x7F];
+				uint8_t rom[0x8000];
+				uint8_t videoRam[0x2000];
+				uint8_t externalRam[0x2000];
+				uint8_t Ram[0x2000];
+				uint8_t echoRam[0x1E00];
+				uint8_t oamRam[0xA0];
+				uint8_t space[0x60];
+				uint8_t iO[0x80];
+				uint8_t hRam[0x7F];
 			};
 		};
 	};
 
 	void loadBios(MMU* mmu, std::string filePath);
-	char readBios8(MMU* mmu, char addr);
-	void writeBios8(MMU* mmu, char addr, char data);
-	void writeBios16(MMU* mmu, char16_t addr, char16_t data);
-	char16_t readBios16(MMU* mmu, char addr);
-	char16_t readMemory16(MMU* mmu, char16_t addr);
-	void writeMemory16(MMU* mmu, char16_t addr, char16_t data);
+	uint8_t readBios8(MMU* mmu, uint8_t addr);
+	void writeBios8(MMU* mmu, uint8_t addr, uint8_t data);
+	void writeBios16(MMU* mmu, uint16_t addr, uint16_t data);
+	uint16_t readBios16(MMU* mmu, uint16_t addr);
+	uint16_t readMemory16(MMU* mmu, uint16_t addr);
+	void writeMemory16(MMU* mmu, uint16_t addr, uint16_t data);
 	void destroy(MMU* mmu);
 };

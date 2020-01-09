@@ -149,12 +149,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="CPURegister.cpp" />
     <ClCompile Include="FileLoader.cpp" />
     <ClCompile Include="GameBoyEmulator.cpp" />
     <ClCompile Include="MMU.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CPU.h" />
+    <ClInclude Include="CPURegister.h" />
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="MMU.h" />
   </ItemGroup>

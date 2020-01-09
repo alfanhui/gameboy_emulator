@@ -5,6 +5,14 @@
 #include <uchar.h>
 
 
+CPU::CPU() {
+	af->joined = 0;
+	bc->joined = 0;
+	de->joined = 0;
+	hl->joined = 0;
+	sp->joined = 0;
+	pc->joined = 0;
+}
 
 void CPU::runInstruction()
 {
@@ -13,15 +21,4 @@ void CPU::runInstruction()
 
 void CPU::destroyCpu(CPU* cpu) {
 	delete cpu;
-}
-
-char16_t CPU::registers::read16(CPU::registers* reg, char addr)
-{
-	return *((char16_t*)(reg->array + addr));
-}
-
-void CPU::registers::write16(CPU::registers* reg, char addr, char16_t data)
-{
-	char16_t* pos = ((char16_t*)(reg->array + addr));
-	*pos = data;
 }

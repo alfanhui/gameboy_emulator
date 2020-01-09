@@ -1,2 +1,5 @@
-﻿  GameBoyEmulator.cpp
+﻿  CPU.cpp
+  GameBoyEmulator.cpp
+  MMU.cpp
+  Generating Code...
   GameBoyEmulator.vcxproj -> C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\x64\Debug\GameBoyEmulator.exe
