@@ -4,7 +4,7 @@ struct MMU
 	uint8_t bios[0x100]; //outside but originally overridden by ROM
 	struct {
 		union {
-			uint8_t memory[0x1000];
+			uint8_t memory[0xFFFF];
 			struct {
 				uint8_t rom[0x8000];
 				uint8_t videoRam[0x2000];

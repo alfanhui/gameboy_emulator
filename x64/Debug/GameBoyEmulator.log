@@ -1,5 +1,7 @@
 ﻿  CPU.cpp
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPURegister.h(4,1): error C2008: ',': unexpected in macro definition
+  CPURegister.cpp
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPURegister.h(4,1): error C2008: ',': unexpected in macro definition
   GameBoyEmulator.cpp
-  MMU.cpp
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPURegister.h(4,1): error C2008: ',': unexpected in macro definition
   Generating Code...
-  GameBoyEmulator.vcxproj -> C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\x64\Debug\GameBoyEmulator.exe

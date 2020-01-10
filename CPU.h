@@ -6,16 +6,11 @@
 class CPU
 {
 private:
-	CPURegister* af = new CPURegister();
-	CPURegister* bc = new CPURegister();
-	CPURegister* de = new CPURegister();
-	CPURegister* hl = new CPURegister();
-	CPURegister* sp = new CPURegister();
-	CPURegister* pc = new CPURegister();
-
+	CPURegister* reg;
 public:
 	CPU();
-	void runInstruction();
+	void runInstruction(uint8_t opcode, uint8_t n);
+	void LDnn_n(uint8_t reg, uint8_t n);
 	void destroyCpu(CPU* cpu);
 
 };
