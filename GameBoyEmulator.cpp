@@ -16,9 +16,6 @@ int main()
     CPU* cpu = new CPU();
     cpu->runInstruction(0x00, 0x00);
 
-    
-
-
     mmu->destroy(mmu);
     std::cout << "GameBoy Emulator Exited.\n";
 }

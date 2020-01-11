@@ -1,7 +1,4 @@
 ﻿  CPU.cpp
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPURegister.h(4,1): error C2008: ',': unexpected in macro definition
-  CPURegister.cpp
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPURegister.h(4,1): error C2008: ',': unexpected in macro definition
-  GameBoyEmulator.cpp
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPURegister.h(4,1): error C2008: ',': unexpected in macro definition
-  Generating Code...
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(48,18): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(49,18): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
+  GameBoyEmulator.vcxproj -> C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\x64\Debug\GameBoyEmulator.exe

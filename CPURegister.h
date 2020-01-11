@@ -1,20 +1,21 @@
 #pragma once
 #include <cstdint>
 
-#define B,G 0x00
-#define C 0x01
-#define D 0x02
-#define E 0x03
-#define H 0x04
-#define L 0x05
-#define A 0x0a
-#define F 0x0b
-#define BC 0x00
-#define DE 0x02
-#define HL 0x04
-#define SP 0x06
-#define PC 0x08
-#define AF 0x10
+//Due to opcodes numbering, the following order is representative for easily mapping to opcodes.
+constexpr auto B = 0x00;
+constexpr auto C = 0x01;
+constexpr auto D = 0x02;
+constexpr auto E = 0x03;
+constexpr auto H = 0x04;
+constexpr auto L = 0x05;
+constexpr auto A = 0x06;
+constexpr auto F = 0x07;
+constexpr auto BC = 0x00;
+constexpr auto DE = 0x02;
+constexpr auto HL = 0x04;
+constexpr auto AF = 0x06;
+constexpr auto SP = 0x08;
+constexpr auto PC = 0x10;
 
 struct CPURegister
 {
@@ -27,12 +28,12 @@ struct CPURegister
 			uint8_t e;
 			uint8_t h;
 			uint8_t l;
+			uint8_t a;
+			uint8_t f;
 			uint8_t s1;
 			uint8_t p1;
 			uint8_t p2;
 			uint8_t c2;
-			uint8_t a;
-			uint8_t f;
 		};
 	};
 	uint8_t read8(CPURegister* reg, uint8_t addr);
