@@ -22,8 +22,10 @@ struct MMU
 	void loadBios(MMU* mmu, std::string filePath);
 	uint8_t readBios8(MMU* mmu, uint8_t addr);
 	void writeBios8(MMU* mmu, uint8_t addr, uint8_t data);
-	void writeBios16(MMU* mmu, uint16_t addr, uint16_t data);
 	uint16_t readBios16(MMU* mmu, uint16_t addr);
+	void writeBios16(MMU* mmu, uint16_t addr, uint16_t data);
+	uint8_t readMemory8(MMU* mmu, uint16_t addr);
+	void writeMemory8(MMU* mmu, uint16_t addr, uint8_t data);
 	uint16_t readMemory16(MMU* mmu, uint16_t addr);
 	void writeMemory16(MMU* mmu, uint16_t addr, uint16_t data);
 	void destroy(MMU* mmu);

@@ -1,4 +1,2 @@
-﻿  CPU.cpp
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(48,18): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(49,18): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
+﻿  GameBoyEmulator.cpp
   GameBoyEmulator.vcxproj -> C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\x64\Debug\GameBoyEmulator.exe

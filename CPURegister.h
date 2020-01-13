@@ -30,10 +30,10 @@ struct CPURegister
 			uint8_t l;
 			uint8_t a;
 			uint8_t f;
-			uint8_t s1;
-			uint8_t p1;
-			uint8_t p2;
-			uint8_t c2;
+			uint8_t sp_first;
+			uint8_t sp_last;
+			uint8_t pc_first;
+			uint8_t pc_last;
 		};
 	};
 	uint8_t read8(CPURegister* reg, uint8_t addr);

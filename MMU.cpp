@@ -23,7 +23,7 @@ void MMU::loadBios(MMU* mmu, std::string filePath) {
 		}
 	} catch (std::exception & e) {
 		std::cout << e.what() << "Not expected bios size (256).";
-	}
+	} 
 	std::cout << "BIOS Loaded.\n";
 }
 
@@ -45,6 +45,15 @@ void MMU::writeBios16(MMU* mmu, uint16_t addr, uint16_t data) {
 	uint16_t* pos = ((uint16_t*)(mmu->bios + addr));
 	*pos = data;
 }
+
+uint8_t MMU::readMemory8(MMU* mmu, uint16_t addr) {
+	return *(mmu->memory + addr);
+}
+
+void MMU::writeMemory8(MMU* mmu, uint16_t addr, uint8_t data) {
+	mmu->memory[addr] = data;
+}
+
 
 uint16_t MMU::readMemory16(MMU* mmu, uint16_t addr) {
 	return *((uint16_t*) (mmu->memory + addr));
