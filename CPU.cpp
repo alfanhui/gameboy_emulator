@@ -27,37 +27,44 @@ void CPU::runInstruction(uint16_t opcode)
 		case 0x02: case 0x12: case 0x77: case 0xEA:
 			LDn_A(opcode);
 			break;
-		case 0xF2: //LD A,(C) Put value at address $FF00 + C into A. [8 cycles]
-			_reg->write8(_reg, A, _mmu->readMemory8(_mmu, 0xFF00 + _reg->c));
+		case 0xF2: 
+			LDA_C(opcode);
 			break;
-		case 0xE2: //LD (C),A Put value A into $FF00 + C. [8 cycles]
-			_mmu->writeMemory8(_mmu, (0xFF00 + _reg->c), _reg->a);
+		case 0xE2: 
+			LDC_A(opcode);
 			break;
-		case 0x3A: //LD A,HL- Put value at address HL into A, then Decrement HL. [8 cycles]
-			_reg->write8(_reg, A, _mmu->readMemory16(_mmu, _reg->read16(_reg, HL)));
-			_reg->write16(_reg, HL, _reg->read16(_reg, HL) - 1);
+		case 0x3A: 
+			LDA_HLneg(opcode);
 			break;
-		case 0x2A: //LD A,HL+ Put value at address HL into A, then Increment HL. [8 cycles]
-			_reg->write8(_reg, A, _mmu->readMemory16(_mmu, _reg->read16(_reg, HL)));
-			_reg->write16(_reg, HL, _reg->read16(_reg, HL) + 1);
+		case 0x2A:
+			LDDA_HLpos(opcode);
 			break;
-		case 0x22: //LD HL+,A Put A in the address HL, then Increment HL. [8 cycles]
-			_mmu->writeMemory8(_mmu, _reg->read16(_reg, HL), _reg->read8(_reg, A));
-			_reg->write16(_reg, HL, _reg->read16(_reg, HL) + 1);
+		case 0x22: 
+			LDIHL_A(opcode);
 			break;
-		case 0xE0: //LD (n),A Put value A into $FF00 + n. [12 cycles]
-			_mmu->writeMemory8(_mmu, (0xFF00 + _reg->pc_first), _reg->a);
+		case 0xE0:
+			LDN_A(opcode);
 			break;
-		case 0xF0: //LD A,(n) Put memory address $FF00 + n into A. [12 cycles]
-			_reg->write8(_reg, A, _mmu->readBios16(_mmu, 0xFF00 + _reg->pc_first));
+		case 0xF0: 
+			LDA_N(opcode);
 			break;
 		case 0x01: case 0x11: case 0x21: case 0x31:
 			LDn_nn16(opcode);
 			break;
 		case 0xF9:
-			//Put HL into SP [8 cycles]
-			_reg->write16(_reg, SP, _reg->read16(_reg, HL));
+			LDSP_HL(opcode);
 			break;
+		case 0xF8: 
+			LDHL_SPn(opcode);
+			break;
+		case 0x08: 
+			LDNN_SP(opcode);
+			break;
+		case 0xF5: case 0xC5: case 0xD5: case 0xE5:
+			PUSHnn(opcode);
+			break;
+		case 0xF1: case 0xC1: case 0xD1: case 0xE1:
+			POPnn(opcode);
 		default: 
 			std::cout << "Instruction not mapped." << std::endl;
 	}
@@ -148,12 +155,79 @@ void CPU::LDn_A(uint16_t opcode) {
 	_mmu->writeMemory8(_mmu, n, _reg->a ); //4 cycles
 }
 
-//Put 16byte value nn into n. 12 cycles
-void CPU::LDn_nn16(uint16_t opcode) {
-	_mmu->writeMemory16(_mmu, _reg->read16(_reg,(((opcode - 1) / 16) * 2)), _reg->read16(_reg, PC));
+//LD A,(C) Put value at address $FF00 + C into A. [8 cycles]
+void CPU::LDA_C(uint16_t opcode) {
+	_reg->write8(_reg, A, _mmu->readMemory8(_mmu, 0xFF00 + _reg->c));
 }
 
+//LD (C),A Put value A into $FF00 + C. [8 cycles]
+void CPU::LDC_A(uint16_t opcode) {
+	_mmu->writeMemory8(_mmu, (0xFF00 + _reg->c), _reg->a);
+}
 
+//LD A,HL- Put value at address HL into A, then Decrement HL. [8 cycles]
+void CPU::LDA_HLneg(uint16_t opcode) {
+	_reg->write8(_reg, A, _mmu->readMemory16(_mmu, _reg->read16(_reg, HL)));
+	_reg->write16(_reg, HL, _reg->read16(_reg, HL) - 1);
+}
+
+//LD A,HL+ Put value at address HL into A, then Increment HL. [8 cycles] 
+void CPU::LDDA_HLpos(uint16_t opcode) {
+	_reg->write8(_reg, A, _mmu->readMemory16(_mmu, _reg->read16(_reg, HL)));
+	_reg->write16(_reg, HL, _reg->read16(_reg, HL) + 1);
+}
+
+//LD HL+,A Put A in the address HL, then Increment HL. [8 cycles]
+void CPU::LDIHL_A(uint16_t opcode) {
+	_mmu->writeMemory8(_mmu, _reg->read16(_reg, HL), _reg->read8(_reg, A));
+	_reg->write16(_reg, HL, _reg->read16(_reg, HL) + 1);
+}
+
+//LD (n),A Put value A into $FF00 + n. [12 cycles]
+void CPU::LDN_A(uint16_t opcode) {
+	_mmu->writeMemory8(_mmu, (0xFF00 + _reg->pc_first), _reg->a);
+}
+
+//LD A,(n) Put memory address $FF00 + n into A. [12 cycles]
+void CPU::LDA_N(uint16_t opcode) {
+	_reg->write8(_reg, A, _mmu->readBios16(_mmu, 0xFF00 + _reg->pc_first));
+}
+
+//Put 16byte value nn into n. 12 cycles
+void CPU::LDn_nn16(uint16_t opcode) {
+	_mmu->writeMemory16(_mmu, _reg->read16(_reg, (((opcode - 1) / 16) * 2)), _reg->read16(_reg, PC));
+}
+
+//LDSPHL Put HL into SP [8 cycles]
+void CPU::LDSP_HL(uint16_t opcode) {
+	_reg->write16(_reg, SP, _reg->read16(_reg, HL));
+}
+
+//LDHLSPn Put SP + n effective address into HL. [12 cycles]
+void CPU::LDHL_SPn(uint16_t opcode) {
+	throw std::invalid_argument("this instruction has not been fully implemented");
+	_reg->write16(_reg, HL, _mmu->readMemory16(_mmu, _reg->read16(_reg, SP) + _reg->pc_first));
+	//missing H, C flag setting
+	_flags->setFlag(FLAG_Z, false);
+	_flags->setFlag(FLAG_N, false);
+}
+
+//Put Stack Pointer (SP) at address nn [20 cycles]
+void CPU::LDNN_SP(uint16_t opcode) {
+	_mmu->writeMemory16(_mmu, _reg->read16(_reg, PC), _reg->read16(_reg, SP));
+}
+
+//Push register pair nn onto stack. Decrement Stack Pointer (SP) twice [16 cycles]
+void CPU::PUSHnn(uint16_t opcode) {
+	_mmu->writeMemory16(_mmu, _reg->read16(_reg, SP), _reg->read16(_reg,((int)floor(opcode / 8) - 24)));
+	_reg->write16(_reg, SP, _reg->read16(_reg, SP) - 2);
+}
+
+//Pop two bytes off stack into register pair nn. Increment Stack Pointer (SP) twice. [12 cycles]
+void CPU::POPnn(uint16_t opcode) {
+	_reg->write16(_reg, (uint16_t)((int)floor(opcode / 8) - 24), _mmu->readMemory16(_mmu, _reg->read16(_reg, SP)));
+	_reg->write16(_reg, SP, _reg->read16(_reg, SP) + 2);
+}
 
 
 void CPU::destroyCpu(CPU* cpu) {

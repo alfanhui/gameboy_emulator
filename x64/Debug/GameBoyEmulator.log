@@ -1,13 +1,9 @@
 ﻿  CPU.cpp
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(37,44): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(41,44): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(52,42): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(80,18): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(81,18): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(105,42): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(128,42): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-  CPUFlags.cpp
-  GameBoyEmulator.cpp
-  Generating Code...
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPUFlags.cpp(33): warning C4715: 'CPUFlags::getMasker': not all control paths return a value
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(87,18): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(88,18): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(112,42): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(135,42): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(170,42): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(176,42): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(193,40): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
   GameBoyEmulator.vcxproj -> C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\x64\Debug\GameBoyEmulator.exe
