@@ -54,6 +54,10 @@ void CPU::runInstruction(uint16_t opcode)
 		case 0x01: case 0x11: case 0x21: case 0x31:
 			LDn_nn16(opcode);
 			break;
+		case 0xF9:
+			//Put HL into SP [8 cycles]
+			_reg->write16(_reg, SP, _reg->read16(_reg, HL));
+			break;
 		default: 
 			std::cout << "Instruction not mapped." << std::endl;
 	}
@@ -148,6 +152,9 @@ void CPU::LDn_A(uint16_t opcode) {
 void CPU::LDn_nn16(uint16_t opcode) {
 	_mmu->writeMemory16(_mmu, _reg->read16(_reg,(((opcode - 1) / 16) * 2)), _reg->read16(_reg, PC));
 }
+
+
+
 
 void CPU::destroyCpu(CPU* cpu) {
 	delete cpu;

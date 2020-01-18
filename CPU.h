@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <string>
 #include "CPURegister.h"
+#include "CPUFlags.h"
 #include "MMU.h"
 
 class CPU
@@ -9,8 +10,9 @@ class CPU
 private:
 	CPURegister* _reg;
 	MMU* _mmu;
+	CPUFlags* _flags;
 public:
-	CPU(MMU* mmu, CPURegister* reg) : _mmu(mmu), _reg(reg) {}
+	CPU(MMU* mmu, CPURegister* reg, CPUFlags* flags) : _mmu(mmu), _reg(reg), _flags(flags) {}
 	void runInstruction(uint16_t opcode);
 	void LDnn_n(uint16_t opcode);
 	void LDr1_r2(uint16_t opcode);
