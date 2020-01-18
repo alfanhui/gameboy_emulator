@@ -31,6 +31,10 @@ public:
 	void LDNN_SP(uint16_t opcode);
 	void PUSHnn(uint16_t opcode);
 	void POPnn(uint16_t opcode);
+	void ADDA_n(uint16_t opcode);
+	void ABCA_n(uint16_t opcode);
+	void SUBA_n(uint16_t opcode);
+	void SBCA_n(uint16_t opcode);
 	void destroyCpu(CPU* cpu);
 };
 

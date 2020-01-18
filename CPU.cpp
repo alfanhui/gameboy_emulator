@@ -65,8 +65,24 @@ void CPU::runInstruction(uint16_t opcode)
 			break;
 		case 0xF1: case 0xC1: case 0xD1: case 0xE1:
 			POPnn(opcode);
+		case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85: 
+		case 0x86: case 0x87: case 0xC6:
+			ADDA_n(opcode);
+			break;
+		case 0x88: case 0x89: case 0x8A: case 0x8B: case 0x8C: case 0x8D:
+		case 0x8E: case 0x8F: case 0xCE:
+			ABCA_n(opcode);
+			break;
+		case 0x90: case 0x91: case 0x92: case 0x93: case 0x94: case 0x95:
+		case 0x96: case 0x97: case 0xD6:
+			SUBA_n(opcode);
+			break;
+		case 0x98: case 0x99: case 0x9A: case 0x9B: case 0x9C: case 0x9D:
+		case 0x9E: case 0x9F: //case ?? wonderful documentation
+			SBCA_n(opcode);
+			break;
 		default: 
-			std::cout << "Instruction not mapped." << std::endl;
+			std::cout << "Instruction not mapped: " << std::hex << opcode << std::endl;
 	}
 }
 
@@ -147,48 +163,48 @@ void CPU::LDn_A(uint16_t opcode) {
 		break;
 	case 0x77:
 		n = _reg->read16(_reg, HL); //8 cycles
-		break;
+break;
 	case 0xEA:
 		n = _reg->read16(_reg, PC); //16 cycles
 		break;
 	}
-	_mmu->writeMemory8(_mmu, n, _reg->a ); //4 cycles
+	_mmu->writeMemory8(_mmu, n, _reg->a); //4 cycles
 }
 
-//LD A,(C) Put value at address $FF00 + C into A. [8 cycles]
+//Put value at address $FF00 + C into A. [8 cycles]
 void CPU::LDA_C(uint16_t opcode) {
 	_reg->write8(_reg, A, _mmu->readMemory8(_mmu, 0xFF00 + _reg->c));
 }
 
-//LD (C),A Put value A into $FF00 + C. [8 cycles]
+//Put value A into $FF00 + C. [8 cycles]
 void CPU::LDC_A(uint16_t opcode) {
 	_mmu->writeMemory8(_mmu, (0xFF00 + _reg->c), _reg->a);
 }
 
-//LD A,HL- Put value at address HL into A, then Decrement HL. [8 cycles]
+//Put value at address HL into A, then Decrement HL. [8 cycles]
 void CPU::LDA_HLneg(uint16_t opcode) {
 	_reg->write8(_reg, A, _mmu->readMemory16(_mmu, _reg->read16(_reg, HL)));
 	_reg->write16(_reg, HL, _reg->read16(_reg, HL) - 1);
 }
 
-//LD A,HL+ Put value at address HL into A, then Increment HL. [8 cycles] 
+//Put value at address HL into A, then Increment HL. [8 cycles] 
 void CPU::LDDA_HLpos(uint16_t opcode) {
 	_reg->write8(_reg, A, _mmu->readMemory16(_mmu, _reg->read16(_reg, HL)));
 	_reg->write16(_reg, HL, _reg->read16(_reg, HL) + 1);
 }
 
-//LD HL+,A Put A in the address HL, then Increment HL. [8 cycles]
+//Put A in the address HL, then Increment HL. [8 cycles]
 void CPU::LDIHL_A(uint16_t opcode) {
 	_mmu->writeMemory8(_mmu, _reg->read16(_reg, HL), _reg->read8(_reg, A));
 	_reg->write16(_reg, HL, _reg->read16(_reg, HL) + 1);
 }
 
-//LD (n),A Put value A into $FF00 + n. [12 cycles]
+//Put value A into $FF00 + n. [12 cycles]
 void CPU::LDN_A(uint16_t opcode) {
 	_mmu->writeMemory8(_mmu, (0xFF00 + _reg->pc_first), _reg->a);
 }
 
-//LD A,(n) Put memory address $FF00 + n into A. [12 cycles]
+//Put memory address $FF00 + n into A. [12 cycles]
 void CPU::LDA_N(uint16_t opcode) {
 	_reg->write8(_reg, A, _mmu->readBios16(_mmu, 0xFF00 + _reg->pc_first));
 }
@@ -198,16 +214,17 @@ void CPU::LDn_nn16(uint16_t opcode) {
 	_mmu->writeMemory16(_mmu, _reg->read16(_reg, (((opcode - 1) / 16) * 2)), _reg->read16(_reg, PC));
 }
 
-//LDSPHL Put HL into SP [8 cycles]
+//Put HL into SP [8 cycles]
 void CPU::LDSP_HL(uint16_t opcode) {
 	_reg->write16(_reg, SP, _reg->read16(_reg, HL));
 }
 
 //LDHLSPn Put SP + n effective address into HL. [12 cycles]
 void CPU::LDHL_SPn(uint16_t opcode) {
-	throw std::invalid_argument("this instruction has not been fully implemented");
 	_reg->write16(_reg, HL, _mmu->readMemory16(_mmu, _reg->read16(_reg, SP) + _reg->pc_first));
-	//missing H, C flag setting
+	//Set flags
+	_flags->setFlag(FLAG_C, (_reg->read16(_reg, SP) + _reg->pc_first) > 0xFF);
+	_flags->setFlag(FLAG_C, ((_reg->read16(_reg, SP) & 0xF) + (_reg->pc_first & 0xF)) > 0xF);
 	_flags->setFlag(FLAG_Z, false);
 	_flags->setFlag(FLAG_N, false);
 }
@@ -219,7 +236,7 @@ void CPU::LDNN_SP(uint16_t opcode) {
 
 //Push register pair nn onto stack. Decrement Stack Pointer (SP) twice [16 cycles]
 void CPU::PUSHnn(uint16_t opcode) {
-	_mmu->writeMemory16(_mmu, _reg->read16(_reg, SP), _reg->read16(_reg,((int)floor(opcode / 8) - 24)));
+	_mmu->writeMemory16(_mmu, _reg->read16(_reg, SP), _reg->read16(_reg, ((int)floor(opcode / 8) - 24)));
 	_reg->write16(_reg, SP, _reg->read16(_reg, SP) - 2);
 }
 
@@ -229,6 +246,91 @@ void CPU::POPnn(uint16_t opcode) {
 	_reg->write16(_reg, SP, _reg->read16(_reg, SP) + 2);
 }
 
+//Add n to A.
+void CPU::ADDA_n(uint16_t opcode) {
+	uint8_t n;
+	if (opcode == 0x86) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (opcode == 0xC6) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
+	}
+	else {
+		n = _reg->read8(_reg, (opcode - 128)); //[4 cycles]
+	}
+	uint8_t value = n + _reg->a;
+	_reg->write8(_reg, A, value);
+
+	//Set flags
+	_flags->setFlag(FLAG_C, (value > 0xFF));
+	_flags->setFlag(FLAG_H, (((_reg->a & 0xF) + (n & 0xF)) > 0xF));
+	_flags->setFlag(FLAG_N, false); //Not a subtraction method
+	_flags->setFlag(FLAG_Z, (value == 0));
+}
+
+//Add n + carry flag to A.
+void CPU::ABCA_n(uint16_t opcode) {
+	uint8_t n;
+	if (opcode == 0x8E) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (opcode == 0xCE) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
+	}
+	else {
+		n = _reg->read8(_reg, (opcode - 136));
+	}
+	uint8_t value = n + _flags->getFlag(FLAG_C) + _reg->a;
+	_reg->write8(_reg, A, (_reg->a + value));
+
+	//Set flags
+	_flags->setFlag(FLAG_C, (value) > 0xFF);
+	_flags->setFlag(FLAG_H, (((_reg->a & 0xF) + (n & 0xF) + (_flags->getFlag(FLAG_C)) > 0xF)));
+	_flags->setFlag(FLAG_N, false); //Not a subtraction method
+	_flags->setFlag(FLAG_Z, (value) == 0);
+}
+
+//Subtract n from A. 
+void CPU::SUBA_n(uint16_t opcode){
+	uint8_t n;
+	if (opcode == 0x96) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (opcode == 0xCE) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
+	}
+	else {
+		n = _reg->read8(_reg, (opcode - 144)); //4 cycles
+	}
+	int8_t value = (int8_t)(_reg->a - n); //we need to check if goes beyond neg for flag wavin'
+	_reg->write8(_reg, A, (uint8_t)value);
+
+	//Set flags
+	_flags->setFlag(FLAG_C, (value < 0));
+	_flags->setFlag(FLAG_H, ((_reg->a & 0xF) < (n & 0xF)));
+	_flags->setFlag(FLAG_N, true); //Not a subtraction method
+	_flags->setFlag(FLAG_Z, (value == 0));
+}
+
+//Subtract n + carry flag from A. 
+void CPU::SBCA_n(uint16_t opcode) {
+	uint8_t n;
+	if (opcode == 0x9E) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	//case ?? lost # 
+	else {
+		n = _reg->read8(_reg, (opcode - 152)); //4 cycles
+	}
+	int8_t value = (int8_t)(_reg->a - (n + _flags->getFlag(FLAG_C))); //we need to check if goes beyond neg for flag wavin'
+	_reg->write8(_reg, A, (uint8_t)value);
+
+	//Set flags
+	_flags->setFlag(FLAG_C, (value < 0));
+	_flags->setFlag(FLAG_H, ((_reg->a & 0xF) < ((n + _flags->getFlag(FLAG_C)) &0xF)));
+	_flags->setFlag(FLAG_N, true); //Not a subtraction method
+	_flags->setFlag(FLAG_Z, (value == 0));
+}
 
 void CPU::destroyCpu(CPU* cpu) {
 	delete cpu;
