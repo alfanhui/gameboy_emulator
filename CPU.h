@@ -21,7 +21,7 @@ public:
 	void LDA_C(uint16_t opcode);
 	void LDC_A(uint16_t opcode);
 	void LDA_HLneg(uint16_t opcode);
-	void LDDA_HLpos(uint16_t opcode);
+	void LDDA_HLpos(uint16_t opcode);  
 	void LDIHL_A(uint16_t opcode);
 	void LDN_A(uint16_t opcode);
 	void LDA_N(uint16_t opcode);
@@ -35,6 +35,11 @@ public:
 	void ABCA_n(uint16_t opcode);
 	void SUBA_n(uint16_t opcode);
 	void SBCA_n(uint16_t opcode);
+	void ANDA_n(uint16_t opcode);
+	void ORA_n(uint16_t opcode);
+	void XORA_n(uint16_t opcode);
+	void CPA_n(uint16_t opcode);
+	void INCN(uint16_t opcode);
 	void destroyCpu(CPU* cpu);
 };
 

@@ -81,6 +81,25 @@ void CPU::runInstruction(uint16_t opcode)
 		case 0x9E: case 0x9F: //case ?? wonderful documentation
 			SBCA_n(opcode);
 			break;
+		case 0xA0: case 0xA1: case 0xA2: case 0xA3: case 0xA4: case 0xA5:
+		case 0xA6: case 0xA7: case 0xE6:
+			ANDA_n(opcode);
+			break;
+		case 0xB0: case 0xB1: case 0xB2: case 0xB3: case 0xB4: case 0xB5:
+		case 0xB6: case 0xB7: case 0xF6:
+			ORA_n(opcode);
+			break;
+		case 0xA8: case 0xA9: case 0xAA: case 0xAB: case 0xAC: case 0xAD:
+		case 0xAE: case 0xAF: case 0xEE:
+			XORA_n(opcode);
+			break;
+		case 0xB8: case 0xB9: case 0xBA: case 0xBB: case 0xBC: case 0xBD:
+		case 0xBE: case 0xBF: case 0xFE:
+			CPA_n(opcode);
+			break;
+		case 0x04: case 0x0C: case 0x14: case 0x1C: case 0x24: case 0x2C:
+		case 0x34: case 0x3C:
+			break;
 		default: 
 			std::cout << "Instruction not mapped: " << std::hex << opcode << std::endl;
 	}
@@ -255,6 +274,9 @@ void CPU::ADDA_n(uint16_t opcode) {
 	else if (opcode == 0xC6) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
 	}
+	else if (opcode == 0x87) { //A,A, edge case [4 cycles]
+		n = _reg->read8(_reg, (opcode - 129));
+	}
 	else {
 		n = _reg->read8(_reg, (opcode - 128)); //[4 cycles]
 	}
@@ -276,6 +298,9 @@ void CPU::ABCA_n(uint16_t opcode) {
 	}
 	else if (opcode == 0xCE) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
+	}
+	else if (opcode == 0x97) { //A,A edge case [4 cycles]
+		n = _reg->read8(_reg, (opcode - 137));
 	}
 	else {
 		n = _reg->read8(_reg, (opcode - 136));
@@ -299,6 +324,9 @@ void CPU::SUBA_n(uint16_t opcode){
 	else if (opcode == 0xCE) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
 	}
+	else if (opcode == 0x9F) { //A,A edge case [4 cycles]
+		n = _reg->read8(_reg, (opcode - 145));
+	}
 	else {
 		n = _reg->read8(_reg, (opcode - 144)); //4 cycles
 	}
@@ -308,7 +336,7 @@ void CPU::SUBA_n(uint16_t opcode){
 	//Set flags
 	_flags->setFlag(FLAG_C, (value < 0));
 	_flags->setFlag(FLAG_H, ((_reg->a & 0xF) < (n & 0xF)));
-	_flags->setFlag(FLAG_N, true); //Not a subtraction method
+	_flags->setFlag(FLAG_N, true);
 	_flags->setFlag(FLAG_Z, (value == 0));
 }
 
@@ -318,7 +346,10 @@ void CPU::SBCA_n(uint16_t opcode) {
 	if (opcode == 0x9E) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
 	}
-	//case ?? lost # 
+	else if (opcode == 0xA7) { //A,A edge case [4 cycles]
+		n = _reg->read8(_reg, (opcode - 153));
+	}
+	//case ?? lost opcode #
 	else {
 		n = _reg->read8(_reg, (opcode - 152)); //4 cycles
 	}
@@ -328,8 +359,118 @@ void CPU::SBCA_n(uint16_t opcode) {
 	//Set flags
 	_flags->setFlag(FLAG_C, (value < 0));
 	_flags->setFlag(FLAG_H, ((_reg->a & 0xF) < ((n + _flags->getFlag(FLAG_C)) &0xF)));
-	_flags->setFlag(FLAG_N, true); //Not a subtraction method
+	_flags->setFlag(FLAG_N, true);
 	_flags->setFlag(FLAG_Z, (value == 0));
+}
+
+//Logically AND n with A, result in A.
+void CPU::ANDA_n(uint16_t opcode) {
+	uint8_t n;
+	if (opcode == 0xA6) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	} 
+	else if (opcode == 0xE6) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
+	} 
+	else if (opcode == 0xA7) { //A,A edge case [4 cycles]
+		n = _reg->read8(_reg, (opcode - 161));
+	}
+	else {
+		n = _reg->read8(_reg, (opcode - 160)); //4 cycles
+	}
+	uint8_t value = (_reg->a & n);
+	_reg->write8(_reg, A, value);
+
+	//Set flags
+	_flags->setFlag(FLAG_C, false);
+	_flags->setFlag(FLAG_H, (((_reg->a & 0xF) & (n & 0xF)) > 0xF));
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, (value == 0));
+}
+
+// Logical OR n with register A, result in A.
+void CPU::ORA_n(uint16_t opcode) {
+	uint8_t n;
+	if (opcode == 0xB6) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (opcode == 0xF6) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
+	}
+	else if (opcode == 0xB7) { //A,A edge case [4 cycles]
+		n = _reg->read8(_reg, (opcode - 177));
+	}
+	else {
+		n = _reg->read8(_reg, (opcode - 176)); //4 cycles
+	}
+	uint8_t value = (_reg->a | n);
+	_reg->write8(_reg, A, value);
+
+	//Set flags
+	_flags->setFlag(FLAG_C, false);
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, (value == 0));
+}
+
+//Logical exclusive OR n with register A, result in A.
+void CPU::XORA_n(uint16_t opcode) {
+	uint8_t n;
+	if (opcode == 0xAE) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (opcode == 0xEE) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
+	}
+	else if (opcode == 0xAF) { //A,A edge case [4 cycles]
+		n = _reg->read8(_reg, (opcode - 169));
+	}
+	else {
+		n = _reg->read8(_reg, (opcode - 168)); //4 cycles
+	}
+	uint8_t value = (_reg->a ^ n);
+	_reg->write8(_reg, A, value);
+
+	//Set flags
+	_flags->setFlag(FLAG_C, false);
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, (value == 0));
+}
+
+//Compare A with n. Basically A - n, but don't store results
+void CPU::CPA_n(uint16_t opcode) {
+	uint8_t n;
+	if (opcode == 0xBE) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (opcode == 0xFE) { //edge case [8 cycles]
+		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, SP));
+	}
+	else if (opcode == 0xBF) { //A,A edge case [4 cycles]
+		n = _reg->read8(_reg, (opcode - 185));
+	}
+	else {
+		n = _reg->read8(_reg, (opcode - 184)); //4 cycles
+	}
+
+	//Set flags
+	_flags->setFlag(FLAG_C, (_reg->a < n));
+	_flags->setFlag(FLAG_H, (_reg->a & 0xF) < (n & 0xF));
+	_flags->setFlag(FLAG_N, true);
+	_flags->setFlag(FLAG_Z, ((_reg->a - n) == 0));
+}
+
+//Increment register n
+void CPU::INCN(uint16_t opcode) {
+	//04 B		04 0
+	//0C C		12 1
+	//14 D		20 2
+	//1C E		28 3
+	//24 H		36 4
+	//2C L		44 5
+	//34 (HL)	52 4
+	//3C A		60 6
 }
 
 void CPU::destroyCpu(CPU* cpu) {
