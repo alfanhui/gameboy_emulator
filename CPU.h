@@ -40,6 +40,10 @@ public:
 	void XORA_n(uint16_t opcode);
 	void CPA_n(uint16_t opcode);
 	void INCN(uint16_t opcode);
+	void DECN(uint16_t opcode);
+	void ADDHL_n16(uint16_t opcode);
+	void ADDSP_n16(uint16_t opcode);
+	void INCnn16(uint16_t opcode);
 	void destroyCpu(CPU* cpu);
 };
 

@@ -99,6 +99,23 @@ void CPU::runInstruction(uint16_t opcode)
 			break;
 		case 0x04: case 0x0C: case 0x14: case 0x1C: case 0x24: case 0x2C:
 		case 0x34: case 0x3C:
+			INCN(opcode);
+			break;
+		case 0x05: case 0x0D: case 0x15: case 0x1D: case 0x25: case 0x2D:
+		case 0x35: case 0x3D:
+			DECN(opcode);
+			break;
+		case 0x09: case 0x19: case 0x29: case 0x39:
+			ADDHL_n16(opcode);
+			break;
+		case 0xE8:
+			ADDSP_n16(opcode);
+			break;
+		case 0x03: case 0x13: case 0x23: case 0x33:
+			INCnn16(opcode);
+			break;
+		case 0x0B: case 0x1B: case 0x2B: case 0x3B:
+			DECnn16(opcode);
 			break;
 		default: 
 			std::cout << "Instruction not mapped: " << std::hex << opcode << std::endl;
@@ -463,14 +480,86 @@ void CPU::CPA_n(uint16_t opcode) {
 
 //Increment register n
 void CPU::INCN(uint16_t opcode) {
-	//04 B		04 0
-	//0C C		12 1
-	//14 D		20 2
-	//1C E		28 3
-	//24 H		36 4
-	//2C L		44 5
-	//34 (HL)	52 4
-	//3C A		60 6
+	uint8_t n = (opcode - 4) / 8;
+	uint8_t value;
+	if (opcode == 0x34) { // edge case [12 cycles]
+		n = HL;
+		value = _mmu->readMemory8(_mmu, _reg->read16(_reg, n));
+	}
+	else if (opcode == 0x3C) { // edge case [4 cycles]
+		n = A;
+		value = _reg->read8(_reg, n); //duplicate below i know, but easy read
+	}
+	else { // [4 cycles] 
+		value = _reg->read8(_reg, n);
+	}
+	_reg->write8(_reg, n, (value+1));
+	//Set flags
+	//FLAG_C not affected
+	_flags->setFlag(FLAG_H, ((value + 1) & 0xF) > 0xF);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, ((value + 1) == 0));
+}
+
+//Decrement register n
+void CPU::DECN(uint16_t opcode) {
+	uint8_t n = (opcode - 5) / 8;
+	uint8_t value;
+	if (opcode == 0x35) { // edge case [12 cycles]
+		n = HL;
+		value = _mmu->readMemory8(_mmu, _reg->read16(_reg, n));
+	}
+	else if (opcode == 0x3D) { // edge case [4 cycles]
+		n = A;
+		value = _reg->read8(_reg, n); //duplicate below i know, but easy read
+	}
+	else { // [4 cycles] 
+		value = _reg->read8(_reg, n);
+	}
+	_reg->write8(_reg, n, (value - 1));
+	//Set flags
+	//FLAG_C not affected
+	_flags->setFlag(FLAG_H, ((value & 0xF) == 0)); //Not sure if this is correct
+	_flags->setFlag(FLAG_N, true);
+	_flags->setFlag(FLAG_Z, ((value - 1) == 0));
+}
+
+//Add n to HL [8 cycles]
+void CPU::ADDHL_n16(uint16_t opcode) {
+	uint8_t hl_value = _reg->read16(_reg, HL);
+	uint8_t n = opcode == 0x39 ? SP : (((opcode - 1) / 8) - 1); //SP is offset by A
+	uint8_t n_value = _reg->read16(_reg, n);
+	_flags->setFlag(FLAG_C, hl_value + n_value > 0xFF);
+	_flags->setFlag(FLAG_H, (hl_value & 0xF) + (n_value & 0xF) > 0xF);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, ((hl_value + n_value) == 0)); //'Not affected' in docs?
+}
+
+//Add n to Stack Pointer (only the first signed byte) [16 cycles]
+void CPU::ADDSP_n16(uint16_t opcode) {
+	int8_t n = (int8_t)_reg->pc_first;
+	uint16_t sp_value = _reg->read16(_reg, SP);
+	_reg->write16(_reg, SP, sp_value + n);
+	_flags->setFlag(FLAG_C, (sp_value + n) > 0xFF);
+	_flags->setFlag(FLAG_H, (sp_value & 0xF) + (n & 0xF) > 0xF);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, false);
+}
+
+//Increment nn [8 cycles]
+void CPU::INCnn16(uint16_t opcode) {
+	uint8_t n = opcode == 0x33 ? SP : ((opcode - 3) / 8); //SP is offset by A
+	uint16_t nn_value = _reg->read16(_reg, n);
+	_reg->write16(_reg, n, nn_value + 1);
+	//No flag changes ?
+}
+
+//Decrement nn [8 cycles]
+void CPU::DECnn16(uint16_t opcode) {
+	uint8_t n = opcode == 0x3B ? SP : (((opcode - 3) / 8) - 1); //SP is offset by A
+	uint16_t nn_value = _reg->read16(_reg, n);
+	_reg->write16(_reg, n, nn_value - 1);
+	//No flag changes ?
 }
 
 void CPU::destroyCpu(CPU* cpu) {
