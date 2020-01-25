@@ -24,13 +24,13 @@
     <ClCompile Include="GameBoyEmulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MMU.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CPURegister.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CPUFlags.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MMU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,13 +41,13 @@
     <ClInclude Include="FileLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MMU.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CPURegister.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CPUFlags.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MMU.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

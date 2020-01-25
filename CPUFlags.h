@@ -12,18 +12,18 @@ constexpr auto FLAG_N = 6; //(N)Subtract flag: Is set if subtraction was perform
 constexpr auto FLAG_Z = 7; //(Z)Zero Flag: Is set when result of math opertation is zero or two values (when using CP instruction)
 
 class CPUFlags {
-	std::bitset<8> mask0{ 0b0000'0001 };
-	std::bitset<8> mask1{ 0b0000'0010 };
-	std::bitset<8> mask2{ 0b0000'0100 };
-	std::bitset<8> mask3{ 0b0000'1000 };
-	std::bitset<8> mask4{ 0b0001'0000 }; 
-	std::bitset<8> mask5{ 0b0010'0000 }; 
-	std::bitset<8> mask6{ 0b0100'0000 }; 
-	std::bitset<8> mask7{ 0b1000'0000 }; 
-	std::bitset<8> getMasker(int mask);
+	std::bitset<8> _mask0{ 0b0000'0001 };
+	std::bitset<8> _mask1{ 0b0000'0010 };
+	std::bitset<8> _mask2{ 0b0000'0100 };
+	std::bitset<8> _mask3{ 0b0000'1000 };
+	std::bitset<8> _mask4{ 0b0001'0000 }; 
+	std::bitset<8> _mask5{ 0b0010'0000 }; 
+	std::bitset<8> _mask6{ 0b0100'0000 }; 
+	std::bitset<8> _mask7{ 0b1000'0000 }; 
+	std::bitset<8> GetMasker(int mask);
 public:
 	std::bitset<8> flags{ }; //8 bit comparer
-	int getFlag(int mask);
-	void setFlag(int mask, bool isOn);
-	void bitFlip(int mask);
+	int GetFlag(int mask);
+	void SetFlag(int mask, bool isOn);
+	void BitFlip(int mask);
 };

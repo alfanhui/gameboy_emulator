@@ -20,7 +20,7 @@ char* FileLoader::ReadFile(std::string filePath) {
     return 0;
 }
 
-int FileLoader::sizeOfFile(std::string filePath) {
+int FileLoader::SizeOfFile(std::string filePath) {
     std::ifstream inputFile(filePath, std::ifstream::binary);
     if (inputFile) {
         inputFile.seekg(0, inputFile.end);

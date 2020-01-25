@@ -13,7 +13,7 @@ class mmuException : public std::exception
 	}
 } mmuException;
 
-void MMU::loadBios(MMU* mmu, std::string filePath) {
+void MMU::LoadBios(MMU* mmu, std::string filePath) {
 	FileLoader fileLoader;
 	char* bios = fileLoader.ReadFile(filePath);
 	try {
@@ -27,43 +27,43 @@ void MMU::loadBios(MMU* mmu, std::string filePath) {
 	std::cout << "BIOS Loaded.\n";
 }
 
-uint8_t MMU::readBios8(MMU* mmu, uint8_t addr) {
+uint8_t MMU::ReadBios8(MMU* mmu, uint8_t addr) {
 	return *(mmu->bios + addr);
 }
 
-void MMU::writeBios8(MMU* mmu, uint8_t addr, uint8_t data) {
+void MMU::WriteBios8(MMU* mmu, uint8_t addr, uint8_t data) {
 	mmu->bios[addr] = data;
 }
 
 //not used?
-uint16_t MMU::readBios16(MMU* mmu, uint16_t addr) {
+uint16_t MMU::ReadBios16(MMU* mmu, uint16_t addr) {
 	return *((char16_t*)(mmu->bios + addr));
 }
 
 //not used?
-void MMU::writeBios16(MMU* mmu, uint16_t addr, uint16_t data) {
+void MMU::WriteBios16(MMU* mmu, uint16_t addr, uint16_t data) {
 	uint16_t* pos = ((uint16_t*)(mmu->bios + addr));
 	*pos = data;
 }
 
-uint8_t MMU::readMemory8(MMU* mmu, uint16_t addr) {
+uint8_t MMU::ReadMemory8(MMU* mmu, uint16_t addr) {
 	return *(mmu->memory + addr);
 }
 
-void MMU::writeMemory8(MMU* mmu, uint16_t addr, uint8_t data) {
+void MMU::WriteMemory8(MMU* mmu, uint16_t addr, uint8_t data) {
 	mmu->memory[addr] = data;
 }
 
 
-uint16_t MMU::readMemory16(MMU* mmu, uint16_t addr) {
+uint16_t MMU::ReadMemory16(MMU* mmu, uint16_t addr) {
 	return *((uint16_t*) (mmu->memory + addr));
 }
 
-void MMU::writeMemory16(MMU* mmu, uint16_t addr, uint16_t data) {
+void MMU::WriteMemory16(MMU* mmu, uint16_t addr, uint16_t data) {
 	uint16_t* pos = ((uint16_t*)(mmu->memory + addr));
 	*pos = data;
 }
 
-void MMU::destroy(MMU* mmu) {
+void MMU::Destroy(MMU* mmu) {
 	delete mmu;
 }

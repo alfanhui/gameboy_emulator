@@ -12,12 +12,12 @@ int main()
     CPURegister* reg = new CPURegister();
     CPUFlags* flags = new CPUFlags();
 
-    reg->write16(reg, PC, 0x100); //surely bios needs to be fed through from 0x00?
-    mmu->loadBios(mmu, BIOS_FILE_PATH);
+    reg->Write16(reg, PC, 0x100); //surely bios needs to be fed through from 0x00?
+    mmu->LoadBios(mmu, BIOS_FILE_PATH);
 
     CPU* cpu = new CPU(mmu, reg, flags);
-    cpu->runInstruction(0x00);
+    cpu->RunInstruction(0x00);
 
-    mmu->destroy(mmu);
+    mmu->Destroy(mmu);
     std::cout << "GameBoy Emulator Exited.\n";
 }

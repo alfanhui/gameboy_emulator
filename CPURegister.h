@@ -36,8 +36,8 @@ struct CPURegister
 			uint8_t pc_last;
 		};
 	};
-	uint8_t read8(CPURegister* reg, uint8_t addr);
-	void write8(CPURegister* reg, uint8_t addr, uint8_t data);
-	uint16_t read16(CPURegister* reg, uint16_t addr);
-	void write16(CPURegister* reg, uint16_t addr, uint16_t data);
+	uint8_t Read8(CPURegister* reg, uint8_t addr);
+	void Write8(CPURegister* reg, uint8_t addr, uint8_t data);
+	uint16_t Read16(CPURegister* reg, uint16_t addr);
+	void Write16(CPURegister* reg, uint16_t addr, uint16_t data);
 };

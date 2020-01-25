@@ -1,37 +1,37 @@
 #include "CPUFlags.h"
 #include <iostream>
 
-std::bitset<8> CPUFlags::getMasker(int mask) {
+std::bitset<8> CPUFlags::GetMasker(int mask) {
 	switch (mask) {
 	case 0:
-		return mask0;
+		return _mask0;
 	case 1:
-		return mask1;
+		return _mask1;
 	case 2:
-		return mask2;
+		return _mask2;
 	case 3:
-		return mask3;
+		return _mask3;
 	case 4:
-		return mask4;
+		return _mask4;
 	case 5:
-		return mask5;
+		return _mask5;
 	case 6:
-		return mask6;
+		return _mask6;
 	case 7:
-		return mask7;
+		return _mask7;
 	default:
 		//Error!
 		throw std::invalid_argument("getMasker was given out of bound int");
 	}
 }
 
-int CPUFlags::getFlag(int mask){
+int CPUFlags::GetFlag(int mask){
 	return flags.test(mask);
 }
 
 //Theres probably a more neater way of doing this, but does it really matter?
-void CPUFlags::setFlag(int mask, bool isOn) {
-	std::bitset<8> masker = getMasker(mask);
+void CPUFlags::SetFlag(int mask, bool isOn) {
+	std::bitset<8> masker = GetMasker(mask);
 	if (isOn) {
 		flags |= masker;
 	}
@@ -40,7 +40,7 @@ void CPUFlags::setFlag(int mask, bool isOn) {
 	}
 }
 
-void CPUFlags::bitFlip(int mask) {
-	std::bitset<8> masker = getMasker(mask);
+void CPUFlags::BitFlip(int mask) {
+	std::bitset<8> masker = GetMasker(mask);
 	flags ^= masker;
 }
