@@ -12,7 +12,7 @@ int main()
     CPURegister* reg = new CPURegister();
     CPUFlags* flags = new CPUFlags();
 
-    reg->write16(reg, PC, 0x100);
+    reg->write16(reg, PC, 0x100); //surely bios needs to be fed through from 0x00?
     mmu->loadBios(mmu, BIOS_FILE_PATH);
 
     CPU* cpu = new CPU(mmu, reg, flags);

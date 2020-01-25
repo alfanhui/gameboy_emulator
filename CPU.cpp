@@ -3,7 +3,7 @@
 #include <uchar.h>
 #include "CPU.h"
 
-void CPU::runInstruction(uint16_t opcode)
+void CPU::runInstruction(uint8_t opcode)
 {
 	switch (opcode) {
 		case 0x06: case 0x0E: case 0x16: case 0x1E:	case 0x26: case 0x2E:
@@ -117,6 +117,31 @@ void CPU::runInstruction(uint16_t opcode)
 		case 0x0B: case 0x1B: case 0x2B: case 0x3B:
 			DECnn16(opcode);
 			break;
+		case 0xCB:
+			CB(opcode);
+			break;
+		case 0x27:
+			DAA();
+			break;
+		case 0x2F:
+			CPL();
+			break;
+		case 0x3F:
+			CCF();
+			break;
+		case 0x37:
+			SCF();
+			break;
+		case 0x00:
+			NOP();
+			break;
+		case 0x76:
+			HALT();
+			break;
+		case 0x10:
+			TEN();
+			break;
+
 		default: 
 			std::cout << "Instruction not mapped: " << std::hex << opcode << std::endl;
 	}
@@ -124,12 +149,12 @@ void CPU::runInstruction(uint16_t opcode)
 
 //all variations 8 cycles
 //Desc: Put value n into _reg.
-void CPU::LDnn_n(uint16_t opcode) {
+void CPU::LDnn_n(uint8_t opcode) {
 	_reg->write8(_reg, ((opcode + 2) / 8) - 1, _reg->pc_first);
 }
 
 //Put value r2 into r1.
-void CPU::LDr1_r2(uint16_t opcode) {
+void CPU::LDr1_r2(uint8_t opcode) {
 	//12 cycles
 	if (opcode == 0x36) { //edge case
 		_mmu->writeMemory8(_mmu, _reg->read16(_reg, HL), _reg->pc_first);
@@ -169,7 +194,7 @@ void CPU::LDr1_r2(uint16_t opcode) {
 }
 
 //Put value n into A.
-void CPU::LDA_n(uint16_t opcode) {
+void CPU::LDA_n(uint8_t opcode) {
 	uint8_t n_value = BC;
 	switch (opcode) {
 	case 0x1A:
@@ -188,7 +213,7 @@ void CPU::LDA_n(uint16_t opcode) {
 }
 
 //Put value A into n
-void CPU::LDn_A(uint16_t opcode) {
+void CPU::LDn_A(uint8_t opcode) {
 	uint16_t n = (((opcode + 1) / 8) - 9);
 	switch (opcode) {
 	case 0x02:
@@ -208,55 +233,55 @@ break;
 }
 
 //Put value at address $FF00 + C into A. [8 cycles]
-void CPU::LDA_C(uint16_t opcode) {
+void CPU::LDA_C(uint8_t opcode) {
 	_reg->write8(_reg, A, _mmu->readMemory8(_mmu, 0xFF00 + _reg->c));
 }
 
 //Put value A into $FF00 + C. [8 cycles]
-void CPU::LDC_A(uint16_t opcode) {
+void CPU::LDC_A(uint8_t opcode) {
 	_mmu->writeMemory8(_mmu, (0xFF00 + _reg->c), _reg->a);
 }
 
 //Put value at address HL into A, then Decrement HL. [8 cycles]
-void CPU::LDA_HLneg(uint16_t opcode) {
+void CPU::LDA_HLneg(uint8_t opcode) {
 	_reg->write8(_reg, A, _mmu->readMemory16(_mmu, _reg->read16(_reg, HL)));
 	_reg->write16(_reg, HL, _reg->read16(_reg, HL) - 1);
 }
 
 //Put value at address HL into A, then Increment HL. [8 cycles] 
-void CPU::LDDA_HLpos(uint16_t opcode) {
+void CPU::LDDA_HLpos(uint8_t opcode) {
 	_reg->write8(_reg, A, _mmu->readMemory16(_mmu, _reg->read16(_reg, HL)));
 	_reg->write16(_reg, HL, _reg->read16(_reg, HL) + 1);
 }
 
 //Put A in the address HL, then Increment HL. [8 cycles]
-void CPU::LDIHL_A(uint16_t opcode) {
+void CPU::LDIHL_A(uint8_t opcode) {
 	_mmu->writeMemory8(_mmu, _reg->read16(_reg, HL), _reg->read8(_reg, A));
 	_reg->write16(_reg, HL, _reg->read16(_reg, HL) + 1);
 }
 
 //Put value A into $FF00 + n. [12 cycles]
-void CPU::LDN_A(uint16_t opcode) {
+void CPU::LDN_A(uint8_t opcode) {
 	_mmu->writeMemory8(_mmu, (0xFF00 + _reg->pc_first), _reg->a);
 }
 
 //Put memory address $FF00 + n into A. [12 cycles]
-void CPU::LDA_N(uint16_t opcode) {
+void CPU::LDA_N(uint8_t opcode) {
 	_reg->write8(_reg, A, _mmu->readBios16(_mmu, 0xFF00 + _reg->pc_first));
 }
 
 //Put 16byte value nn into n. 12 cycles
-void CPU::LDn_nn16(uint16_t opcode) {
+void CPU::LDn_nn16(uint8_t opcode) {
 	_mmu->writeMemory16(_mmu, _reg->read16(_reg, (((opcode - 1) / 16) * 2)), _reg->read16(_reg, PC));
 }
 
 //Put HL into SP [8 cycles]
-void CPU::LDSP_HL(uint16_t opcode) {
+void CPU::LDSP_HL(uint8_t opcode) {
 	_reg->write16(_reg, SP, _reg->read16(_reg, HL));
 }
 
 //LDHLSPn Put SP + n effective address into HL. [12 cycles]
-void CPU::LDHL_SPn(uint16_t opcode) {
+void CPU::LDHL_SPn(uint8_t opcode) {
 	_reg->write16(_reg, HL, _mmu->readMemory16(_mmu, _reg->read16(_reg, SP) + _reg->pc_first));
 	//Set flags
 	_flags->setFlag(FLAG_C, (_reg->read16(_reg, SP) + _reg->pc_first) > 0xFF);
@@ -266,24 +291,24 @@ void CPU::LDHL_SPn(uint16_t opcode) {
 }
 
 //Put Stack Pointer (SP) at address nn [20 cycles]
-void CPU::LDNN_SP(uint16_t opcode) {
+void CPU::LDNN_SP(uint8_t opcode) {
 	_mmu->writeMemory16(_mmu, _reg->read16(_reg, PC), _reg->read16(_reg, SP));
 }
 
 //Push register pair nn onto stack. Decrement Stack Pointer (SP) twice [16 cycles]
-void CPU::PUSHnn(uint16_t opcode) {
+void CPU::PUSHnn(uint8_t opcode) {
 	_mmu->writeMemory16(_mmu, _reg->read16(_reg, SP), _reg->read16(_reg, ((int)floor(opcode / 8) - 24)));
 	_reg->write16(_reg, SP, _reg->read16(_reg, SP) - 2);
 }
 
 //Pop two bytes off stack into register pair nn. Increment Stack Pointer (SP) twice. [12 cycles]
-void CPU::POPnn(uint16_t opcode) {
+void CPU::POPnn(uint8_t opcode) {
 	_reg->write16(_reg, (uint16_t)((int)floor(opcode / 8) - 24), _mmu->readMemory16(_mmu, _reg->read16(_reg, SP)));
 	_reg->write16(_reg, SP, _reg->read16(_reg, SP) + 2);
 }
 
 //Add n to A.
-void CPU::ADDA_n(uint16_t opcode) {
+void CPU::ADDA_n(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0x86) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
@@ -308,7 +333,7 @@ void CPU::ADDA_n(uint16_t opcode) {
 }
 
 //Add n + carry flag to A.
-void CPU::ABCA_n(uint16_t opcode) {
+void CPU::ABCA_n(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0x8E) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
@@ -333,7 +358,7 @@ void CPU::ABCA_n(uint16_t opcode) {
 }
 
 //Subtract n from A. 
-void CPU::SUBA_n(uint16_t opcode){
+void CPU::SUBA_n(uint8_t opcode){
 	uint8_t n;
 	if (opcode == 0x96) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
@@ -358,7 +383,7 @@ void CPU::SUBA_n(uint16_t opcode){
 }
 
 //Subtract n + carry flag from A. 
-void CPU::SBCA_n(uint16_t opcode) {
+void CPU::SBCA_n(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0x9E) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
@@ -381,7 +406,7 @@ void CPU::SBCA_n(uint16_t opcode) {
 }
 
 //Logically AND n with A, result in A.
-void CPU::ANDA_n(uint16_t opcode) {
+void CPU::ANDA_n(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0xA6) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
@@ -406,7 +431,7 @@ void CPU::ANDA_n(uint16_t opcode) {
 }
 
 // Logical OR n with register A, result in A.
-void CPU::ORA_n(uint16_t opcode) {
+void CPU::ORA_n(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0xB6) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
@@ -431,7 +456,7 @@ void CPU::ORA_n(uint16_t opcode) {
 }
 
 //Logical exclusive OR n with register A, result in A.
-void CPU::XORA_n(uint16_t opcode) {
+void CPU::XORA_n(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0xAE) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
@@ -456,7 +481,7 @@ void CPU::XORA_n(uint16_t opcode) {
 }
 
 //Compare A with n. Basically A - n, but don't store results
-void CPU::CPA_n(uint16_t opcode) {
+void CPU::CPA_n(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0xBE) { //edge case [8 cycles]
 		n = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
@@ -479,7 +504,7 @@ void CPU::CPA_n(uint16_t opcode) {
 }
 
 //Increment register n
-void CPU::INCN(uint16_t opcode) {
+void CPU::INCN(uint8_t opcode) {
 	uint8_t n = (opcode - 4) / 8;
 	uint8_t value;
 	if (opcode == 0x34) { // edge case [12 cycles]
@@ -502,7 +527,7 @@ void CPU::INCN(uint16_t opcode) {
 }
 
 //Decrement register n
-void CPU::DECN(uint16_t opcode) {
+void CPU::DECN(uint8_t opcode) {
 	uint8_t n = (opcode - 5) / 8;
 	uint8_t value;
 	if (opcode == 0x35) { // edge case [12 cycles]
@@ -525,7 +550,7 @@ void CPU::DECN(uint16_t opcode) {
 }
 
 //Add n to HL [8 cycles]
-void CPU::ADDHL_n16(uint16_t opcode) {
+void CPU::ADDHL_n16(uint8_t opcode) {
 	uint8_t hl_value = _reg->read16(_reg, HL);
 	uint8_t n = opcode == 0x39 ? SP : (((opcode - 1) / 8) - 1); //SP is offset by A
 	uint8_t n_value = _reg->read16(_reg, n);
@@ -536,7 +561,7 @@ void CPU::ADDHL_n16(uint16_t opcode) {
 }
 
 //Add n to Stack Pointer (only the first signed byte) [16 cycles]
-void CPU::ADDSP_n16(uint16_t opcode) {
+void CPU::ADDSP_n16(uint8_t opcode) {
 	int8_t n = (int8_t)_reg->pc_first;
 	uint16_t sp_value = _reg->read16(_reg, SP);
 	_reg->write16(_reg, SP, sp_value + n);
@@ -547,7 +572,7 @@ void CPU::ADDSP_n16(uint16_t opcode) {
 }
 
 //Increment nn [8 cycles]
-void CPU::INCnn16(uint16_t opcode) {
+void CPU::INCnn16(uint8_t opcode) {
 	uint8_t n = opcode == 0x33 ? SP : ((opcode - 3) / 8); //SP is offset by A
 	uint16_t nn_value = _reg->read16(_reg, n);
 	_reg->write16(_reg, n, nn_value + 1);
@@ -555,12 +580,148 @@ void CPU::INCnn16(uint16_t opcode) {
 }
 
 //Decrement nn [8 cycles]
-void CPU::DECnn16(uint16_t opcode) {
+void CPU::DECnn16(uint8_t opcode) {
 	uint8_t n = opcode == 0x3B ? SP : (((opcode - 3) / 8) - 1); //SP is offset by A
 	uint16_t nn_value = _reg->read16(_reg, n);
 	_reg->write16(_reg, n, nn_value - 1);
 	//No flag changes ?
 }
+
+//No cycles
+void CPU::CB(uint8_t opcode) {
+	//_reg->write16(_reg, PC, _reg->read16(_reg, PC) + 1); //increment PC as nested instruction
+	uint16_t cb_opcode = _mmu->readMemory8(_mmu, _reg->pc_first); 
+	switch (cb_opcode) {
+		case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35:
+		case 0x36: case 0x37:
+			SWAPN(cb_opcode);
+			break;
+		default:
+			std::cout << "CB type instruction not mapped: " << std::hex << cb_opcode << std::endl;
+	}
+}
+
+void CPU::SWAPN(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x36) {
+		n_value = _mmu->readMemory8(_mmu, _reg->read8(_reg, HL));
+	}
+	else if (cb_opcode == 0x37) {
+		n_value = _reg->read8(_reg, A);
+	}
+	else {
+		n_value = _reg->read8(_reg, cb_opcode - 30);
+	}
+	uint8_t result = ((n_value & 0xF) && 15) || (((n_value & 15) & 0xF) >> 4); //Do the switcharoo
+	if (cb_opcode == 0x36) { //(HL) edge case [16 cycles]
+		_mmu->writeMemory8(_mmu, _reg->read8(_reg, HL), result);
+	}
+	else if (cb_opcode == 0x37) { //A edge case [8 cycles]
+		_reg->write8(_reg, A, result);
+	}
+	else { // [8 cycles]
+		_reg->write8(_reg, cb_opcode - 30, result);
+	}
+	_flags->setFlag(FLAG_C, false);
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, result == 0);
+}
+
+// Decimal adjust register A
+// Mixed documentation on this function. Subtraction condition added thanks to CrociDB [4 cycles]
+void CPU::DAA() {
+	uint8_t a_value = _reg->a;
+	if (_flags->getFlag(FLAG_N) == 1) {
+		if (_flags->getFlag(FLAG_H) == 1) {
+			a_value -= 0x06;
+		}
+		if (_flags->getFlag(FLAG_C) == 1) {
+			a_value -= 0x60;
+		}
+	}
+	else {
+		//if the least significant four bits of A contain a non - BCD digit(i.e.it is greater than 9) or the H flag is set,
+		if ((_reg->a && 15) > 9 || _flags->getFlag(FLAG_H) == 1) {
+			//then $06 is added to the register.
+			a_value += 0x06;
+		}
+		//Then the four most significant bits are checked.
+		//If this more significant digit also happens to be greater than 9 or the C flag is set, 
+		if ((_reg->a >> 4) > 9 || _flags->getFlag(FLAG_C) == 1) {
+			//then $60 is added.
+			a_value += 0x60;
+		}
+	}
+	_reg->write8(_reg, A, a_value);
+
+	_flags->setFlag(FLAG_C, _reg->a > 0xFF);
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, _reg->a == 0);
+}
+
+//Complement A register. (Flip all bits.) [4 cycles]
+void CPU::CPL() {
+	_reg->write8(_reg, A, ~(_reg->a));
+	_flags->setFlag(FLAG_H, true);
+	_flags->setFlag(FLAG_N, true);
+}
+
+//Complement FLAG_C [4 cycles]
+void CPU::CCF() {
+	_flags->bitFlip(FLAG_C);
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+}
+
+//Set Carry flag. [4 cycles]
+void CPU::SCF() {
+	_flags->setFlag(FLAG_C, true);
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+}
+
+//No operation [4 cycles]
+void CPU::NOP() {
+	return;
+}
+
+//Power down CPU until an interrupt occurs. [4 cycles]
+void CPU::HALT() {
+	_halt = true;
+	NOP(); //As per manual suggestions
+	//TODO wait until interupt occurs.
+}
+
+//Only used for STOP instruction, no cycles
+void CPU::TEN() {
+	uint8_t ten_opcode = _reg->pc_first;
+	switch (ten_opcode) {
+	case 0x00:
+		STOP();
+		break;
+	default:
+		std::cout << "TEN type instruction not mapped: " << std::hex << ten_opcode << std::endl;
+	}
+}
+
+//Halt CPU & LCD display until button pressed. [4 cycles]
+void CPU::STOP() {
+	_halt = true;
+	//TODO HALT LCD display
+	//TODO WAIT UNTIL BUTTON PRESS
+}
+
+//disables interrupts (ime) [4 cycles]
+void CPU::DI() {
+	_ime = false;
+}
+
+//enables interrupts (ime) [4 cycles]
+void CPU::EI() {
+	_ime = true;
+}
+
 
 void CPU::destroyCpu(CPU* cpu) {
 	delete cpu;
