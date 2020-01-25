@@ -1,6 +1,4 @@
 #include <iostream>
-#include <string>
-#include <uchar.h>
 #include "CPU.h"
 
 void CPU::RunInstruction(uint8_t opcode)
@@ -283,7 +281,7 @@ void CPU::LdhNA(uint8_t opcode) {
 
 //Put memory address $FF00 + n into A. [12 cycles]
 void CPU::LdhAN(uint8_t opcode) {
-	_reg->Write8(_reg, A, _mmu->ReadBios8(_mmu, 0xFF00 + _reg->pc_first));
+	_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, 0xFF00 + _reg->pc_first));
 }
 
 //Put 16byte value nn into n. 12 cycles
@@ -630,7 +628,15 @@ void CPU::Cb(uint8_t opcode) {
 			break;
 		case 0x20: case 0x21: case 0x22: case 0x23: case 0x24: case 0x25:
 		case 0x26: case 0x27:
-			//SlaN(cb_opcode);
+			SlaN(cb_opcode);
+			break;
+		case 0x28: case 0x29: case 0x2A: case 0x2B: case 0x2C: case 0x2D:
+		case 0x2E: case 0x2F:
+			SraN(cb_opcode);
+			break;
+		case 0x38: case 0x39: case 0x3A: case 0x3B: case 0x3C: case 0x3D:
+		case 0x3E: case 0x3F:
+			SrlN(cb_opcode);
 			break;
 		default:
 			std::cout << "CB type instruction not mapped: " << std::hex << cb_opcode << std::endl;
@@ -930,7 +936,68 @@ void CPU::RrN(uint8_t cb_opcode) {
 	_flags->SetFlag(FLAG_Z, result == 0);
 }
 
+void CPU::SlaN(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x26) { //(hl)
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg,HL));
+	}
+	else if (cb_opcode == 0x27) { //A
+		n_value = _reg->Read8(_reg, A);
+	}
+	else {
+		n_value = _reg->Read8(_reg, cb_opcode - 20);
+	}
 
+	_flags->SetFlag(FLAG_C, (n_value & 7));
+	uint8_t result = (n_value << 1);
+	if (cb_opcode == 0x26) { //(hl) [16 cycles]
+		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), result);
+	}
+	else if (cb_opcode == 0x27) { //A [8 cycles]
+		_reg->Write8(_reg, A, result);
+	}
+	else { //[8 cycles]
+		_reg->Write8(_reg, cb_opcode - 20, result);
+	}
+	
+	_flags->SetFlag(FLAG_H, false);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, result == 0);
+}
+
+void CPU::SraN(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x2E) { //(hl)
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x2F) { //A
+		n_value = _reg->Read8(_reg, A);
+	}
+	else {
+		n_value = _reg->Read8(_reg, cb_opcode - 28);
+	}
+
+	_flags->SetFlag(FLAG_C, (n_value & 7));
+	uint8_t result = (n_value & 7) | (n_value >> 1); //Risky if this is correct
+	if (cb_opcode == 0x2E) { //(hl) [16 cycles]
+		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), result);
+	}
+	else if (cb_opcode == 0x2F) { //A [8 cycles]
+		_reg->Write8(_reg, A, result);
+	}
+	else { //[8 cycles]
+		_reg->Write8(_reg, cb_opcode - 28, result);
+	}
+
+	_flags->SetFlag(FLAG_H, false);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, result == 0);
+}
+
+void CPU::SrlN(uint8_t cb_opcode) {
+	uint8_t n_value;
+
+}
 
 void CPU::destroyCpu(CPU* cpu) {
 	delete cpu;

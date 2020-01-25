@@ -12,7 +12,7 @@ private:
 	MMU* _mmu;
 	CPUFlags* _flags;
 	bool _halt = false;
-	bool _ime = true; //interrupt master enable
+	bool _ime = false; //interrupt master enable
 public:
 	CPU(MMU* mmu, CPURegister* reg, CPUFlags* flags) : _mmu(mmu), _reg(reg), _flags(flags) {}
 	void RunInstruction(uint8_t opcode);
@@ -67,6 +67,8 @@ public:
 	void RlN(uint8_t cb_opcode);
 	void RrcN(uint8_t cb_opcode);
 	void RrN(uint8_t cb_opcode);
+	void SlaN(uint8_t opcode);
+	void SraN(uint8_t cb_opcode);
 	void destroyCpu(CPU* cpu);
 };
 
