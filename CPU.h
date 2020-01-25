@@ -59,6 +59,14 @@ public:
 	void STOP();
 	void DI();
 	void EI();
+	void RLCA();
+	void RLA();
+	void RRCA();
+	void RRA();
+	void RLCN(uint8_t cb_opcode);
+	void RLN(uint8_t cb_opcode);
+	void RRCN(uint8_t cb_opcode);
+	void RRN(uint8_t cb_opcode);
 	void destroyCpu(CPU* cpu);
 };
 

@@ -141,7 +141,24 @@ void CPU::runInstruction(uint8_t opcode)
 		case 0x10:
 			TEN();
 			break;
-
+		case 0xF3:
+			DI();
+			break;
+		case 0xFB:
+			EI();
+			break;
+		case 0x07:
+			RLCA();
+			break;
+		case 0x17:
+			RLA();
+			break;
+		case 0x0F:
+			RRCA();
+			break;
+		case 0x1F:
+			RRA();
+			break;
 		default: 
 			std::cout << "Instruction not mapped: " << std::hex << opcode << std::endl;
 	}
@@ -596,6 +613,22 @@ void CPU::CB(uint8_t opcode) {
 		case 0x36: case 0x37:
 			SWAPN(cb_opcode);
 			break;
+		case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x05:
+		case 0x06: case 0x07:
+			RLCN(cb_opcode);
+			break;
+		case 0x10: case 0x11: case 0x12: case 0x13: case 0x14: case 0x15:
+		case 0x16: case 0x17:
+			RLN(cb_opcode);
+			break;
+		case 0x08: case 0x09: case 0x0A: case 0x0B: case 0x0C: case 0x0D:
+		case 0x0E: case 0x0F:
+			RRCN(cb_opcode);
+			break;
+		case 0x18: case 0x19: case 0x1A: case 0x1B: case 0x1C: case 0x1D:
+		case 0x1E: case 0x1F:
+			RRN(cb_opcode);
+			break;
 		default:
 			std::cout << "CB type instruction not mapped: " << std::hex << cb_opcode << std::endl;
 	}
@@ -722,6 +755,177 @@ void CPU::EI() {
 	_ime = true;
 }
 
+//Rotate A left, old bit 7 in carry flag [4 cycles]
+void CPU::RLCA() {
+	_flags->setFlag(FLAG_C, (_reg->a & 7)); //Don't use old carry flag
+	uint8_t carry = _flags->getFlag(FLAG_C);
+	uint8_t result = (_reg->a << 1) | (carry & 7);
+
+	_reg->write8(_reg, A, result);
+
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, result == 0);
+}
+
+//Rotate A left through Carry flag. [4 cycles]
+void CPU::RLA() {
+	uint8_t carry = _flags->getFlag(FLAG_C);  //Do use old carry flag
+	uint8_t result = (_reg->a << 1) | carry;
+	_flags->setFlag(FLAG_C, (_reg->a & 7));
+
+	_reg->write8(_reg, A, result);
+
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, result == 0);
+}
+
+//Rotate A right, old bit 0 in carry flag [4 cycles]
+void CPU::RRCA() {
+	_flags->setFlag(FLAG_C, (_reg->a & 0)); //Don't use old carry flag
+	uint8_t carry = _flags->getFlag(FLAG_C);
+	uint8_t result = (_reg->a >> 1) | (carry << 7);
+
+	_reg->write8(_reg, A, result);
+
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, result == 0);
+}
+
+//Rotate A right through carry flag [4 cycles]
+void CPU::RRA() {
+	uint8_t carry = _flags->getFlag(FLAG_C);
+	_flags->setFlag(FLAG_C, (_reg->a & 0)); //Don't use old carry flag
+	uint8_t result = (_reg->a >> 1) | (carry << 7);
+
+	_reg->write8(_reg, A, result);
+
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, result == 0);
+}
+
+//Rotate n left. Old bit 7 to Carry flag.
+void CPU::RLCN(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x06) { // [16 cycles]
+		n_value = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x07) { // [8 cycles]
+		n_value = _reg->read8(_reg, A);
+	}
+	else { // [8 cycles]
+		n_value = _reg->read8(_reg, cb_opcode);
+	}
+	_flags->setFlag(FLAG_C, (n_value & 7)); //Don't use old carry flag
+	uint8_t carry = _flags->getFlag(FLAG_C);
+	uint8_t result = (n_value << 1) | (carry & 7);
+	if (cb_opcode == 0x06) { // [16 cycles]
+		_mmu->writeMemory8(_mmu, _reg->read16(_reg, HL), result);
+	}
+	else if (cb_opcode == 0x07) { // [8 cycles]
+		_reg->write8(_reg, A, n_value);
+	}
+	else { // [8 cycles]
+		_reg->write8(_reg, cb_opcode, n_value);
+	}
+	
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, n_value == 0);
+}
+
+//Rotate n left through Carry flag.
+void CPU::RLN(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x16) { // [16 cycles]
+		n_value = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x17) { // [8 cycles]
+		n_value = _reg->read8(_reg, A);
+	}
+	else { // [8 cycles]
+		n_value = _reg->read8(_reg, cb_opcode - 10);
+	}
+	uint8_t carry = _flags->getFlag(FLAG_C);
+	_flags->setFlag(FLAG_C, (n_value & 7)); //Don't use old carry flag
+	uint8_t result = (n_value << 1) | carry;
+	if (cb_opcode == 0x16) { // [16 cycles]
+		_mmu->writeMemory8(_mmu, _reg->read16(_reg, HL), result);
+	}
+	else if (cb_opcode == 0x17) { // [8 cycles]
+		_reg->write8(_reg, A, n_value);
+	}
+	else { // [8 cycles]
+		_reg->write8(_reg, cb_opcode - 10, n_value);
+	}
+
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, n_value == 0);
+}
+
+//Rotate n right. Old bit 7 to Carry flag.
+void CPU::RRCN(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x0E) { // [16 cycles]
+		n_value = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x0F) { // [8 cycles]
+		n_value = _reg->read8(_reg, A);
+	}
+	else { // [8 cycles]
+		n_value = _reg->read8(_reg, cb_opcode - 8);
+	}
+	_flags->setFlag(FLAG_C, (n_value & 0)); //Don't use old carry flag
+	uint8_t carry = _flags->getFlag(FLAG_C);
+	uint8_t result = (n_value >> 1) | (carry << 7);
+	if (cb_opcode == 0x0E) { // [16 cycles]
+		_mmu->writeMemory8(_mmu, _reg->read16(_reg, HL), result);
+	}
+	else if (cb_opcode == 0x0F) { // [8 cycles]
+		_reg->write8(_reg, A, n_value);
+	}
+	else { // [8 cycles]
+		_reg->write8(_reg, cb_opcode - 8, n_value);
+	}
+
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, n_value == 0);
+}
+
+//Rotate n right. Old bit 7 to Carry flag.
+void CPU::RRN(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x1E) { // [16 cycles]
+		n_value = _mmu->readMemory8(_mmu, _reg->read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x1F) { // [8 cycles]
+		n_value = _reg->read8(_reg, A);
+	}
+	else { // [8 cycles]
+		n_value = _reg->read8(_reg, cb_opcode - 18);
+	}
+	uint8_t carry = _flags->getFlag(FLAG_C);
+	_flags->setFlag(FLAG_C, (n_value & 0)); //Don't use old carry flag
+	uint8_t result = (n_value >> 1) | (carry << 7);
+	if (cb_opcode == 0x1E) { // [16 cycles]
+		_mmu->writeMemory8(_mmu, _reg->read16(_reg, HL), result);
+	}
+	else if (cb_opcode == 0x1F) { // [8 cycles]
+		_reg->write8(_reg, A, n_value);
+	}
+	else { // [8 cycles]
+		_reg->write8(_reg, cb_opcode - 18, n_value);
+	}
+
+	_flags->setFlag(FLAG_H, false);
+	_flags->setFlag(FLAG_N, false);
+	_flags->setFlag(FLAG_Z, n_value == 0);
+}
 
 void CPU::destroyCpu(CPU* cpu) {
 	delete cpu;
