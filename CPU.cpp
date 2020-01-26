@@ -638,6 +638,102 @@ void CPU::Cb(uint8_t opcode) {
 		case 0x3E: case 0x3F:
 			SrlN(cb_opcode);
 			break;
+		case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
+		case 0x46: case 0x47:
+			Bit0(cb_opcode);
+			break;
+		case 0x48: case 0x49: case 0x4A: case 0x4B: case 0x4C: case 0x4D:
+		case 0x4E: case 0x4F:
+			Bit1(cb_opcode);
+			break;
+		case 0x50: case 0x51: case 0x52: case 0x53: case 0x54: case 0x55:
+		case 0x56: case 0x57:
+			Bit2(cb_opcode);
+			break;
+		case 0x58: case 0x59: case 0x5A: case 0x5B: case 0x5C: case 0x5D:
+		case 0x5E: case 0x5F:
+			Bit3(cb_opcode);
+			break;
+		case 0x60: case 0x61: case 0x62: case 0x63: case 0x64: case 0x65:
+		case 0x66: case 0x67:
+			Bit4(cb_opcode);
+			break;
+		case 0x68: case 0x69: case 0x6A: case 0x6B: case 0x6C: case 0x6D:
+		case 0x6E: case 0x6F:
+			Bit5(cb_opcode);
+			break;
+		case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75:
+		case 0x76: case 0x77:
+			Bit6(cb_opcode);
+			break;
+		case 0x78: case 0x79: case 0x7A: case 0x7B: case 0x7C: case 0x7D:
+		case 0x7E: case 0x7F:
+			Bit7(cb_opcode);
+			break;
+		case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85:
+		case 0x86: case 0x87:
+			Res0(cb_opcode);
+			break;
+		case 0x88: case 0x89: case 0x8A: case 0x8B: case 0x8C: case 0x8D:
+		case 0x8E: case 0x8F:
+			Res1(cb_opcode);
+			break;
+		case 0x90: case 0x91: case 0x92: case 0x93: case 0x94: case 0x95:
+		case 0x96: case 0x97:
+			Res2(cb_opcode);
+			break;
+		case 0x98: case 0x99: case 0x9A: case 0x9B: case 0x9C: case 0x9D:
+		case 0x9E: case 0x9F:
+			Res3(cb_opcode);
+			break;
+		case 0xA0: case 0xA1: case 0xA2: case 0xA3: case 0xA4: case 0xA5:
+		case 0xA6: case 0xA7:
+			Res4(cb_opcode);
+			break;
+		case 0xA8: case 0xA9: case 0xAA: case 0xAB: case 0xAC: case 0xAD:
+		case 0xAE: case 0xAF:
+			Res5(cb_opcode);
+			break;
+		case 0xB0: case 0xB1: case 0xB2: case 0xB3: case 0xB4: case 0xB5:
+		case 0xB6: case 0xB7:
+			Res6(cb_opcode);
+			break;
+		case 0xB8: case 0xB9: case 0xBA: case 0xBB: case 0xBC: case 0xBD:
+		case 0xBE: case 0xBF:
+			Res7(cb_opcode);
+			break;
+		case 0xC0: case 0xC1: case 0xC2: case 0xC3: case 0xC4: case 0xC5:
+		case 0xC6: case 0xC7:
+			Set0(cb_opcode);
+			break;
+		case 0xC8: case 0xC9: case 0xCA: case 0xCB: case 0xCC: case 0xCD:
+		case 0xCE: case 0xCF:
+			Set1(cb_opcode);
+			break;
+		case 0xD0: case 0xD1: case 0xD2: case 0xD3: case 0xD4: case 0xD5:
+		case 0xD6: case 0xD7:
+			Set2(cb_opcode);
+			break;
+		case 0xD8: case 0xD9: case 0xDA: case 0xDB: case 0xDC: case 0xDD:
+		case 0xDE: case 0xDF:
+			Set3(cb_opcode);
+			break;
+		case 0xE0: case 0xE1: case 0xE2: case 0xE3: case 0xE4: case 0xE5:
+		case 0xE6: case 0xE7:
+			Set4(cb_opcode);
+			break;
+		case 0xE8: case 0xE9: case 0xEA: case 0xEB: case 0xEC: case 0xED:
+		case 0xEE: case 0xEF:
+			Set5(cb_opcode);
+			break;
+		case 0xF0: case 0xF1: case 0xF2: case 0xF3: case 0xF4: case 0xF5:
+		case 0xF6: case 0xF7:
+			Set6(cb_opcode);
+			break;
+		case 0xF8: case 0xF9: case 0xFA: case 0xFB: case 0xFC: case 0xFD:
+		case 0xFE: case 0xFF:
+			Set7(cb_opcode);
+			break;
 		default:
 			std::cout << "CB type instruction not mapped: " << std::hex << cb_opcode << std::endl;
 	}
@@ -936,6 +1032,7 @@ void CPU::RrN(uint8_t cb_opcode) {
 	_flags->SetFlag(FLAG_Z, result == 0);
 }
 
+//Shift n left into Carry. LSB of n set to 0.
 void CPU::SlaN(uint8_t cb_opcode) {
 	uint8_t n_value;
 	if (cb_opcode == 0x26) { //(hl)
@@ -965,6 +1062,7 @@ void CPU::SlaN(uint8_t cb_opcode) {
 	_flags->SetFlag(FLAG_Z, result == 0);
 }
 
+//Shift n right into Carry. MSB doesn't change.
 void CPU::SraN(uint8_t cb_opcode) {
 	uint8_t n_value;
 	if (cb_opcode == 0x2E) { //(hl)
@@ -994,10 +1092,491 @@ void CPU::SraN(uint8_t cb_opcode) {
 	_flags->SetFlag(FLAG_Z, result == 0);
 }
 
+//Shift n right into Carry. MSB set to 0
 void CPU::SrlN(uint8_t cb_opcode) {
 	uint8_t n_value;
+	if (cb_opcode == 0x3E) { //(hl)
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x3F) { //A
+		n_value = _reg->Read8(_reg, A);
+	}
+	else {
+		n_value = _reg->Read8(_reg, cb_opcode - 38);
+	}
 
+	_flags->SetFlag(FLAG_C, (n_value & 7));
+	uint8_t result = n_value >> 1;
+	if (cb_opcode == 0x3E) { //(hl) [16 cycles]
+		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), result);
+	}
+	else if (cb_opcode == 0x3F) { //A [8 cycles]
+		_reg->Write8(_reg, A, result);
+	}
+	else { //[8 cycles]
+		_reg->Write8(_reg, cb_opcode - 38, result);
+	}
+	_flags->SetFlag(FLAG_H, false);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, result == 0);
 }
+
+//Test bit at position 0
+void CPU::Bit0(uint8_t cb_opcode) {
+	int test;
+	if (cb_opcode == 0x46) { //HL [16 cycles]
+		test = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x47) { //A [8 cycles] 
+		test = _reg->Read8(_reg, A);
+	}
+	else {// [8 cycles]
+		test = _reg->Read8(_reg, cb_opcode - 40);
+	}
+	_flags->SetFlag(FLAG_H, true);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, (test & 1) ? 0 : 1);
+}
+
+//Test bit at position 1
+void CPU::Bit1(uint8_t cb_opcode) {
+	int test;
+	if (cb_opcode == 0x4E) { //HL [ 16 cycles]
+		test = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x4F) { //A [8 cycles] 
+		test = _reg->Read8(_reg, A);
+	}
+	else {// [8 cycles]
+		test = _reg->Read8(_reg, cb_opcode - 48);
+	}
+	_flags->SetFlag(FLAG_H, true);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, (test & 2) ? 0 : 1);
+}
+
+//Test bit at position 2
+void CPU::Bit2(uint8_t cb_opcode) {
+	int test;
+	if (cb_opcode == 0x56) { //HL [ 16 cycles]
+		test = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x57) { //A [8 cycles] 
+		test = _reg->Read8(_reg, A);
+	}
+	else {// [8 cycles]
+		test = _reg->Read8(_reg, cb_opcode - 50);
+	}
+	_flags->SetFlag(FLAG_H, true);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, (test & 3) ? 0 : 1);
+}
+
+//Test bit at position 3
+void CPU::Bit3(uint8_t cb_opcode) {
+	int test;
+	if (cb_opcode == 0x5E) { //HL [ 16 cycles]
+		test = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x5F) { //A [8 cycles] 
+		test = _reg->Read8(_reg, A);
+	}
+	else {// [8 cycles]
+		test = _reg->Read8(_reg, cb_opcode - 58);
+	}
+	_flags->SetFlag(FLAG_H, true);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, (test & 4) ? 0 : 1);
+}
+
+//Test bit at position 4
+void CPU::Bit4(uint8_t cb_opcode) {
+	int test;
+	if (cb_opcode == 0x66) { //HL [ 16 cycles]
+		test = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x67) { //A [8 cycles] 
+		test = _reg->Read8(_reg, A);
+	}
+	else {// [8 cycles]
+		test = _reg->Read8(_reg, cb_opcode - 60);
+	}
+	_flags->SetFlag(FLAG_H, true);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, (test & 5) ? 0 : 1);
+}
+
+//Test bit at position 5
+void CPU::Bit5(uint8_t cb_opcode) {
+	int test;
+	if (cb_opcode == 0x6E) { //HL [ 16 cycles]
+		test = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x6F) { //A [8 cycles] 
+		test = _reg->Read8(_reg, A);
+	}
+	else {// [8 cycles]
+		test = _reg->Read8(_reg, cb_opcode - 68);
+	}
+	_flags->SetFlag(FLAG_H, true);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, (test & 6) ? 0 : 1);
+}
+
+//Test bit at position 6
+void CPU::Bit6(uint8_t cb_opcode) {
+	int test;
+	if (cb_opcode == 0x76) { //HL [ 16 cycles]
+		test = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x77) { //A [8 cycles] 
+		test = _reg->Read8(_reg, A);
+	}
+	else {// [8 cycles]
+		test = _reg->Read8(_reg, cb_opcode - 70);
+	}
+	_flags->SetFlag(FLAG_H, true);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, (test & 7) ? 0 : 1);
+}
+
+//Test bit at position 7
+void CPU::Bit7(uint8_t cb_opcode) {
+	int test;
+	if (cb_opcode == 0x7E) { //HL [ 16 cycles]
+		test = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+	}
+	else if (cb_opcode == 0x7F) { //A [8 cycles] 
+		test = _reg->Read8(_reg, A);
+	}
+	else {// [8 cycles]
+		test = _reg->Read8(_reg, cb_opcode - 78);
+	}
+	_flags->SetFlag(FLAG_H, true);
+	_flags->SetFlag(FLAG_N, false);
+	_flags->SetFlag(FLAG_Z, (test & 8) ? 0 : 1);
+}
+
+//Set bit at position 0
+void CPU::Set0(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xC6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 0)) | (1 << 0);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xC7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 0)) | (1 << 0);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 192));
+		n_value = (n_value & ~(1 << 0)) | (1 << 0);
+		_reg->Write8(_reg, (cb_opcode - 192), n_value);
+	}
+}
+
+//Set bit at position 1
+void CPU::Set1(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xCE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 1)) | (1 << 1);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xCF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 1)) | (1 << 1);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 200));
+		n_value = (n_value & ~(1 << 1)) | (1 << 1);
+		_reg->Write8(_reg, (cb_opcode - 200), n_value);
+	}
+}
+
+//Set bit at position 2
+void CPU::Set2(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xD6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 2)) | (1 << 2);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xD7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 2)) | (1 << 2);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 208));
+		n_value = (n_value & ~(1 << 2)) | (1 << 2);
+		_reg->Write8(_reg, (cb_opcode - 208), n_value);
+	}
+}
+
+//Set bit at position 3
+void CPU::Set3(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xDE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 3)) | (1 << 3);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xDF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 3)) | (1 << 3);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 210));
+		n_value = (n_value & ~(1 << 3)) | (1 << 3);
+		_reg->Write8(_reg, (cb_opcode - 210), n_value);
+	}
+}
+
+//Set bit at position 4
+void CPU::Set4(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xE6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 4)) | (1 << 4);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xE8) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 4)) | (1 << 4);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 218));
+		n_value = (n_value & ~(1 << 4)) | (1 << 4);
+		_reg->Write8(_reg, (cb_opcode - 218), n_value);
+	}
+}
+
+//Set bit at position 5
+void CPU::Set5(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xEE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 5)) | (1 << 5);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xEF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 5)) | (1 << 5);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 220));
+		n_value = (n_value & ~(1 << 5)) | (1 << 5);
+		_reg->Write8(_reg, (cb_opcode - 220), n_value);
+	}
+}
+
+//Set bit at position 6
+void CPU::Set6(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xF6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 6)) | (1 << 6);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xF7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 6)) | (1 << 6);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 228));
+		n_value = (n_value & ~(1 << 6)) | (1 << 6);
+		_reg->Write8(_reg, (cb_opcode - 228), n_value);
+	}
+}
+
+//Set bit at position 7
+void CPU::Set7(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xFE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 7)) | (1 << 7);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xF7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 7)) | (1 << 7);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 230));
+		n_value = (n_value & ~(1 << 7)) | (1 << 7);
+		_reg->Write8(_reg, (cb_opcode - 230), n_value);
+	}
+}
+
+//Reset bit at position 0
+void CPU::Res0(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x86) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 0)) | (0 << 0);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0x87) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 0)) | (0 << 0);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 80));
+		n_value = (n_value & ~(1 << 0)) | (0 << 0);
+		_reg->Write8(_reg, (cb_opcode - 80), n_value);
+	}
+}
+
+//Reset bit at position 1
+void CPU::Res1(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x8E) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 1)) | (0 << 1);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0x8F) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 1)) | (0 << 1);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 88));
+		n_value = (n_value & ~(1 << 1)) | (0 << 1);
+		_reg->Write8(_reg, (cb_opcode - 88), n_value);
+	}
+}
+
+//Reset bit at position 2
+void CPU::Res2(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x96) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 2)) | (0 << 2);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0x97) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 2)) | (0 << 2);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 90));
+		n_value = (n_value & ~(1 << 2)) | (0 << 2);
+		_reg->Write8(_reg, (cb_opcode - 90), n_value);
+	}
+}
+
+//Reset bit at position 3
+void CPU::Res3(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0x9E) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 3)) | (0 << 3);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0x9F) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 3)) | (0 << 3);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 98));
+		n_value = (n_value & ~(1 << 3)) | (0 << 3);
+		_reg->Write8(_reg, (cb_opcode - 98), n_value);
+	}
+}
+
+//Reset bit at position 4
+void CPU::Res4(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xA6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 4)) | (0 << 4);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xA8) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 4)) | (0 << 4);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 100));
+		n_value = (n_value & ~(1 << 4)) | (0 << 4);
+		_reg->Write8(_reg, (cb_opcode - 100), n_value);
+	}
+}
+
+//Reset bit at position 5
+void CPU::Res5(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xAE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 5)) | (0 << 5);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xAF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 5)) | (0 << 5);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 108));
+		n_value = (n_value & ~(1 << 5)) | (0 << 5);
+		_reg->Write8(_reg, (cb_opcode - 108), n_value);
+	}
+}
+
+//Reset bit at position 6
+void CPU::Res6(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xB6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 6)) | (0 << 6);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xB7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 6)) | (0 << 6);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 110));
+		n_value = (n_value & ~(1 << 6)) | (0 << 6);
+		_reg->Write8(_reg, (cb_opcode - 110), n_value);
+	}
+}
+
+//Reset bit at position 7
+void CPU::Res7(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xBE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 7)) | (0 << 7);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xB7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 7)) | (0 << 7);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 118));
+		n_value = (n_value & ~(1 << 7)) | (0 << 7);
+		_reg->Write8(_reg, (cb_opcode - 118), n_value);
+	}
+}
+
 
 void CPU::destroyCpu(CPU* cpu) {
 	delete cpu;
