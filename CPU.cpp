@@ -1262,17 +1262,17 @@ void CPU::Res0(uint8_t cb_opcode) {
 	uint8_t n_value;
 	if (cb_opcode == 0x86) { //HL [ 16 cycles]
 		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 0)) | (0 << 0);
+		n_value = (n_value & ~(1 << 0));
 		_mmu->WriteMemory8(_mmu, HL, n_value);
 	}
 	else if (cb_opcode == 0x87) { //A [8 cycles] 
 		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 0)) | (0 << 0);
+		n_value = (n_value & ~(1 << 0));
 		_reg->Write8(_reg, A, n_value);
 	}
 	else {// [8 cycles]
 		n_value = _reg->Read8(_reg, (cb_opcode - 80));
-		n_value = (n_value & ~(1 << 0)) | (0 << 0);
+		n_value = (n_value & ~(1 << 0));
 		_reg->Write8(_reg, (cb_opcode - 80), n_value);
 	}
 }
@@ -1282,17 +1282,17 @@ void CPU::Res1(uint8_t cb_opcode) {
 	uint8_t n_value;
 	if (cb_opcode == 0x8E) { //HL [ 16 cycles]
 		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 1)) | (0 << 1);
+		n_value = (n_value & ~(1 << 1));
 		_mmu->WriteMemory8(_mmu, HL, n_value);
 	}
 	else if (cb_opcode == 0x8F) { //A [8 cycles] 
 		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 1)) | (0 << 1);
+		n_value = (n_value & ~(1 << 1));
 		_reg->Write8(_reg, A, n_value);
 	}
 	else {// [8 cycles]
 		n_value = _reg->Read8(_reg, (cb_opcode - 88));
-		n_value = (n_value & ~(1 << 1)) | (0 << 1);
+		n_value = (n_value & ~(1 << 1));
 		_reg->Write8(_reg, (cb_opcode - 88), n_value);
 	}
 }
@@ -1302,17 +1302,17 @@ void CPU::Res2(uint8_t cb_opcode) {
 	uint8_t n_value;
 	if (cb_opcode == 0x96) { //HL [ 16 cycles]
 		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 2)) | (0 << 2);
+		n_value = (n_value & ~(1 << 2));
 		_mmu->WriteMemory8(_mmu, HL, n_value);
 	}
 	else if (cb_opcode == 0x97) { //A [8 cycles] 
 		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 2)) | (0 << 2);
+		n_value = (n_value & ~(1 << 2));
 		_reg->Write8(_reg, A, n_value);
 	}
 	else {// [8 cycles]
 		n_value = _reg->Read8(_reg, (cb_opcode - 90));
-		n_value = (n_value & ~(1 << 2)) | (0 << 2);
+		n_value = (n_value & ~(1 << 2));
 		_reg->Write8(_reg, (cb_opcode - 90), n_value);
 	}
 }
@@ -1322,17 +1322,17 @@ void CPU::Res3(uint8_t cb_opcode) {
 	uint8_t n_value;
 	if (cb_opcode == 0x9E) { //HL [ 16 cycles]
 		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 3)) | (0 << 3);
+		n_value = (n_value & ~(1 << 3));
 		_mmu->WriteMemory8(_mmu, HL, n_value);
 	}
 	else if (cb_opcode == 0x9F) { //A [8 cycles] 
 		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 3)) | (0 << 3);
+		n_value = (n_value & ~(1 << 3));
 		_reg->Write8(_reg, A, n_value);
 	}
 	else {// [8 cycles]
 		n_value = _reg->Read8(_reg, (cb_opcode - 98));
-		n_value = (n_value & ~(1 << 3)) | (0 << 3);
+		n_value = (n_value & ~(1 << 3));
 		_reg->Write8(_reg, (cb_opcode - 98), n_value);
 	}
 }
@@ -1342,17 +1342,17 @@ void CPU::Res4(uint8_t cb_opcode) {
 	uint8_t n_value;
 	if (cb_opcode == 0xA6) { //HL [ 16 cycles]
 		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 4)) | (0 << 4);
+		n_value = (n_value & ~(1 << 4));
 		_mmu->WriteMemory8(_mmu, HL, n_value);
 	}
 	else if (cb_opcode == 0xA8) { //A [8 cycles] 
 		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 4)) | (0 << 4);
+		n_value = (n_value & ~(1 << 4));
 		_reg->Write8(_reg, A, n_value);
 	}
 	else {// [8 cycles]
 		n_value = _reg->Read8(_reg, (cb_opcode - 100));
-		n_value = (n_value & ~(1 << 4)) | (0 << 4);
+		n_value = (n_value & ~(1 << 4));
 		_reg->Write8(_reg, (cb_opcode - 100), n_value);
 	}
 }
@@ -1362,17 +1362,17 @@ void CPU::Res5(uint8_t cb_opcode) {
 	uint8_t n_value;
 	if (cb_opcode == 0xAE) { //HL [ 16 cycles]
 		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 5)) | (0 << 5);
+		n_value = (n_value & ~(1 << 5));
 		_mmu->WriteMemory8(_mmu, HL, n_value);
 	}
 	else if (cb_opcode == 0xAF) { //A [8 cycles] 
 		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 5)) | (0 << 5);
+		n_value = (n_value & ~(1 << 5));
 		_reg->Write8(_reg, A, n_value);
 	}
 	else {// [8 cycles]
 		n_value = _reg->Read8(_reg, (cb_opcode - 108));
-		n_value = (n_value & ~(1 << 5)) | (0 << 5);
+		n_value = (n_value & ~(1 << 5));
 		_reg->Write8(_reg, (cb_opcode - 108), n_value);
 	}
 }
@@ -1382,17 +1382,17 @@ void CPU::Res6(uint8_t cb_opcode) {
 	uint8_t n_value;
 	if (cb_opcode == 0xB6) { //HL [ 16 cycles]
 		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 6)) | (0 << 6);
+		n_value = (n_value & ~(1 << 6));
 		_mmu->WriteMemory8(_mmu, HL, n_value);
 	}
 	else if (cb_opcode == 0xB7) { //A [8 cycles] 
 		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 6)) | (0 << 6);
+		n_value = (n_value & ~(1 << 6));
 		_reg->Write8(_reg, A, n_value);
 	}
 	else {// [8 cycles]
 		n_value = _reg->Read8(_reg, (cb_opcode - 110));
-		n_value = (n_value & ~(1 << 6)) | (0 << 6);
+		n_value = (n_value & ~(1 << 6));
 		_reg->Write8(_reg, (cb_opcode - 110), n_value);
 	}
 }
@@ -1407,7 +1407,7 @@ void CPU::Res7(uint8_t cb_opcode) {
 	}
 	else if (cb_opcode == 0xB7) { //A [8 cycles] 
 		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 7)) | (0 << 7);
+		n_value = (n_value & ~(1 << 7));
 		_reg->Write8(_reg, A, n_value);
 	}
 	else {// [8 cycles]
