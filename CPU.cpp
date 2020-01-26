@@ -1257,166 +1257,6 @@ void CPU::Bit7(uint8_t cb_opcode) {
 	_flags->SetFlag(FLAG_Z, (test & 8) ? 0 : 1);
 }
 
-//Set bit at position 0
-void CPU::Set0(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xC6) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 0)) | (1 << 0);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-	}
-	else if (cb_opcode == 0xC7) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 0)) | (1 << 0);
-		_reg->Write8(_reg, A, n_value);
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 192));
-		n_value = (n_value & ~(1 << 0)) | (1 << 0);
-		_reg->Write8(_reg, (cb_opcode - 192), n_value);
-	}
-}
-
-//Set bit at position 1
-void CPU::Set1(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xCE) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 1)) | (1 << 1);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-	}
-	else if (cb_opcode == 0xCF) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 1)) | (1 << 1);
-		_reg->Write8(_reg, A, n_value);
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 200));
-		n_value = (n_value & ~(1 << 1)) | (1 << 1);
-		_reg->Write8(_reg, (cb_opcode - 200), n_value);
-	}
-}
-
-//Set bit at position 2
-void CPU::Set2(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xD6) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 2)) | (1 << 2);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-	}
-	else if (cb_opcode == 0xD7) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 2)) | (1 << 2);
-		_reg->Write8(_reg, A, n_value);
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 208));
-		n_value = (n_value & ~(1 << 2)) | (1 << 2);
-		_reg->Write8(_reg, (cb_opcode - 208), n_value);
-	}
-}
-
-//Set bit at position 3
-void CPU::Set3(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xDE) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 3)) | (1 << 3);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-	}
-	else if (cb_opcode == 0xDF) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 3)) | (1 << 3);
-		_reg->Write8(_reg, A, n_value);
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 210));
-		n_value = (n_value & ~(1 << 3)) | (1 << 3);
-		_reg->Write8(_reg, (cb_opcode - 210), n_value);
-	}
-}
-
-//Set bit at position 4
-void CPU::Set4(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xE6) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 4)) | (1 << 4);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-	}
-	else if (cb_opcode == 0xE8) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 4)) | (1 << 4);
-		_reg->Write8(_reg, A, n_value);
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 218));
-		n_value = (n_value & ~(1 << 4)) | (1 << 4);
-		_reg->Write8(_reg, (cb_opcode - 218), n_value);
-	}
-}
-
-//Set bit at position 5
-void CPU::Set5(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xEE) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 5)) | (1 << 5);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-	}
-	else if (cb_opcode == 0xEF) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 5)) | (1 << 5);
-		_reg->Write8(_reg, A, n_value);
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 220));
-		n_value = (n_value & ~(1 << 5)) | (1 << 5);
-		_reg->Write8(_reg, (cb_opcode - 220), n_value);
-	}
-}
-
-//Set bit at position 6
-void CPU::Set6(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xF6) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 6)) | (1 << 6);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-	}
-	else if (cb_opcode == 0xF7) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 6)) | (1 << 6);
-		_reg->Write8(_reg, A, n_value);
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 228));
-		n_value = (n_value & ~(1 << 6)) | (1 << 6);
-		_reg->Write8(_reg, (cb_opcode - 228), n_value);
-	}
-}
-
-//Set bit at position 7
-void CPU::Set7(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xFE) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 7)) | (1 << 7);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-	}
-	else if (cb_opcode == 0xF7) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 7)) | (1 << 7);
-		_reg->Write8(_reg, A, n_value);
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 230));
-		n_value = (n_value & ~(1 << 7)) | (1 << 7);
-		_reg->Write8(_reg, (cb_opcode - 230), n_value);
-	}
-}
-
 //Reset bit at position 0
 void CPU::Res0(uint8_t cb_opcode) {
 	uint8_t n_value;
@@ -1577,6 +1417,165 @@ void CPU::Res7(uint8_t cb_opcode) {
 	}
 }
 
+//Set bit at position 0
+void CPU::Set0(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xC6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 0)) | (1 << 0);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xC7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 0)) | (1 << 0);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 192));
+		n_value = (n_value & ~(1 << 0)) | (1 << 0);
+		_reg->Write8(_reg, (cb_opcode - 192), n_value);
+	}
+}
+
+//Set bit at position 1
+void CPU::Set1(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xCE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 1)) | (1 << 1);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xCF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 1)) | (1 << 1);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 200));
+		n_value = (n_value & ~(1 << 1)) | (1 << 1);
+		_reg->Write8(_reg, (cb_opcode - 200), n_value);
+	}
+}
+
+//Set bit at position 2
+void CPU::Set2(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xD6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 2)) | (1 << 2);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xD7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 2)) | (1 << 2);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 208));
+		n_value = (n_value & ~(1 << 2)) | (1 << 2);
+		_reg->Write8(_reg, (cb_opcode - 208), n_value);
+	}
+}
+
+//Set bit at position 3
+void CPU::Set3(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xDE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 3)) | (1 << 3);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xDF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 3)) | (1 << 3);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 210));
+		n_value = (n_value & ~(1 << 3)) | (1 << 3);
+		_reg->Write8(_reg, (cb_opcode - 210), n_value);
+	}
+}
+
+//Set bit at position 4
+void CPU::Set4(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xE6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 4)) | (1 << 4);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xE8) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 4)) | (1 << 4);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 218));
+		n_value = (n_value & ~(1 << 4)) | (1 << 4);
+		_reg->Write8(_reg, (cb_opcode - 218), n_value);
+	}
+}
+
+//Set bit at position 5
+void CPU::Set5(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xEE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 5)) | (1 << 5);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xEF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 5)) | (1 << 5);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 220));
+		n_value = (n_value & ~(1 << 5)) | (1 << 5);
+		_reg->Write8(_reg, (cb_opcode - 220), n_value);
+	}
+}
+
+//Set bit at position 6
+void CPU::Set6(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xF6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 6)) | (1 << 6);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xF7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 6)) | (1 << 6);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 228));
+		n_value = (n_value & ~(1 << 6)) | (1 << 6);
+		_reg->Write8(_reg, (cb_opcode - 228), n_value);
+	}
+}
+
+//Set bit at position 7
+void CPU::Set7(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xFE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 7)) | (1 << 7);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+	}
+	else if (cb_opcode == 0xF7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 7)) | (1 << 7);
+		_reg->Write8(_reg, A, n_value);
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 230));
+		n_value = (n_value & ~(1 << 7)) | (1 << 7);
+		_reg->Write8(_reg, (cb_opcode - 230), n_value);
+	}
+}
 
 void CPU::destroyCpu(CPU* cpu) {
 	delete cpu;
