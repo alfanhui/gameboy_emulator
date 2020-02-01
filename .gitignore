@@ -3,3 +3,4 @@
 *.rom
 /Debug/*
 /.vs/*
+x64

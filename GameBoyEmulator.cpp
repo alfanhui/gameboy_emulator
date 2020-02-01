@@ -3,7 +3,8 @@
 
 #include <iostream>
 #include "CPU.h"
-#define BIOS_FILE_PATH "dmg_boot.bin"
+constexpr auto BIOS_FILE_PATH = "dmg_boot.bin";
+constexpr auto BIOS_SKIP = false;
 
 int main()
 {
@@ -12,11 +13,18 @@ int main()
     CPURegister* reg = new CPURegister();
     CPUFlags* flags = new CPUFlags();
 
-    reg->Write16(reg, PC, 0x100); //surely bios needs to be fed through from 0x00?
+    BIOS_SKIP ? reg->Write16(reg, PC, 0x0100) : reg->Write16(reg, PC, 0x0000);
     mmu->LoadBios(mmu, BIOS_FILE_PATH);
 
     CPU* cpu = new CPU(mmu, reg, flags);
-    cpu->RunInstruction(0x00);
+
+    //game loop
+    do {
+        uint8_t opcode = mmu->ReadMemory8(mmu, reg->Read8(reg, PC));
+        std::cout << "Running: " << std::hex << (int)opcode << std::endl;
+        reg->Write16(reg, PC, (reg->Read16(reg, PC) + 1));
+        cpu->RunInstruction(opcode);
+    } while (reg->Read16(reg, PC) != 0x0100);   //while not the end of bios
 
     mmu->Destroy(mmu);
     std::cout << "GameBoy Emulator Exited.\n";

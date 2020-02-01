@@ -13,6 +13,7 @@ private:
 	CPUFlags* _flags;
 	bool _halt = false;
 	bool _ime = false; //interrupt master enable
+	uint32_t _cycleCounter = 0;
 public:
 	CPU(MMU* mmu, CPURegister* reg, CPUFlags* flags) : _mmu(mmu), _reg(reg), _flags(flags) {}
 	void RunInstruction(uint8_t opcode);
@@ -20,11 +21,12 @@ public:
 	void LdR1R2(uint8_t opcode);
 	void LdAN(uint8_t opcode);
 	void LdNA(uint8_t opcode);
-	void LdAC(uint8_t opcode);
-	void LdCA(uint8_t opcode);
-	void LdAHlneg(uint8_t opcode);
-	void LddAHlpos(uint8_t opcode);  
-	void LdiHlA(uint8_t opcode);
+	void LdAC();
+	void LdCA();
+	void LdHlnegA();
+	void LdAHlpos();
+	void LdHlposA();
+	void LdAHlneg();
 	void LdhNA(uint8_t opcode);
 	void LdhAN(uint8_t opcode);
 	void LdNNn16(uint8_t opcode);
@@ -86,6 +88,12 @@ public:
 	void Set5(uint8_t cb_opcode);
 	void Set6(uint8_t cb_opcode);
 	void Set7(uint8_t cb_opcode);
+	void JpNn();
+	void JpCcNn(uint8_t opcode);
+	void JpHl();
+	void JrN();
+	void JrCcN(uint8_t opcode);
+	void CallNn();
 	void Res0(uint8_t cb_opcode);
 	void Res1(uint8_t cb_opcode);
 	void Res2(uint8_t cb_opcode);
@@ -94,7 +102,12 @@ public:
 	void Res5(uint8_t cb_opcode);
 	void Res6(uint8_t cb_opcode);
 	void Res7(uint8_t cb_opcode);
-	void destroyCpu(CPU* cpu);
+	void CallCcNn(uint8_t opcode);
+	void RstN(uint8_t opcode);
+	void Ret();
+	void RetCc(uint8_t opcode);
+	void RetI();
+	void DestroyCpu(CPU* cpu);
 };
 
 
