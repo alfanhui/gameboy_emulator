@@ -5,6 +5,7 @@ void CPU::RunInstruction(uint8_t opcode)
 {
 	switch (opcode) {
 		case 0x06: case 0x0E: case 0x16: case 0x1E:	case 0x26: case 0x2E:
+			std::cout << "LD nn, n";
 			LdNnN(opcode); 
 			break;
 		case 0x36: case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: 
@@ -16,178 +17,231 @@ void CPU::RunInstruction(uint8_t opcode)
 		case 0x6A: case 0x6B: case 0x6C: case 0x6E: case 0x70: case 0x71: 
 		case 0x72: case 0x73: case 0x74: case 0x75: case 0x7F: case 0x78: 
 		case 0x79: case 0x7A: case 0x7B: case 0x7C: case 0x7D: case 0x7E:
+			std::cout << "LD r2, r1";
 			LdR1R2(opcode);
 			break;
 		case 0x0A: case 0x1A: case 0xFA: case 0x3E:
+			std::cout << "LD n, A";
 			LdAN(opcode);
 			break;
 		case 0x47: case 0x4F: case 0x57: case 0x5F: case 0x67: case 0x6F:
 		case 0x02: case 0x12: case 0x77: case 0xEA:
+			std::cout << "LD A, n";
 			LdNA(opcode);
 			break;
 		case 0xF2: 
+			std::cout << "LD A, (0xFF00 + C)";
 			LdAC();
 			break;
 		case 0xE2: 
+			std::cout << "LD (0xFF00 + C), A";
 			LdCA();
 			break;
 		case 0x3A: 
+			std::cout << "LD A, (HL-)";
 			LdAHlneg();
 			break;
 		case 0x32:
+			std::cout << "LD (HL-), A";
 			LdHlnegA();
 			break;
 		case 0x2A:
+			std::cout << "LD A, (HL+)";
 			LdAHlpos();
 			break;
 		case 0x22: 
+			std::cout << "LD (HL+), A";
 			LdHlposA();
 			break;
 		case 0xE0:
+			std::cout << "LD (0xFF00 + n), A";
 			LdhNA(opcode);
 			break;
 		case 0xF0: 
+			std::cout << "LD A, (0xFF00 + n)";
 			LdhAN(opcode);
 			break;
 		case 0x01: case 0x11: case 0x21: case 0x31:
+			std::cout << "LD16 nn, A";
 			LdNNn16(opcode);
 			break;
 		case 0xF9:
+			std::cout << "LD16 HL, (SP + n)";
 			LdSpHl(opcode);
 			break;
 		case 0xF8: 
+			std::cout << "LD16 (SP + n), HL";
 			LdHlSpn(opcode);
 			break;
 		case 0x08: 
+			std::cout << "LD16 SP, (nn)";
 			LdNnSp(opcode);
 			break;
 		case 0xF5: case 0xC5: case 0xD5: case 0xE5:
+			std::cout << "PUSH16 nn";
 			PushNn(opcode);
 			break;
 		case 0xF1: case 0xC1: case 0xD1: case 0xE1:
+			std::cout << "POP16 nn";
 			PopNn(opcode);
 		case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85: 
 		case 0x86: case 0x87: case 0xC6:
+			std::cout << "ADD16 n, A";
 			AddAN(opcode);
 			break;
 		case 0x88: case 0x89: case 0x8A: case 0x8B: case 0x8C: case 0x8D:
 		case 0x8E: case 0x8F: case 0xCE:
+			std::cout << "ADC16 n, A";
 			AbcAN(opcode);
 			break;
 		case 0x90: case 0x91: case 0x92: case 0x93: case 0x94: case 0x95:
 		case 0x96: case 0x97: case 0xD6:
+			std::cout << "SUB16 n, A";
 			SubAN(opcode);
 			break;
 		case 0x98: case 0x99: case 0x9A: case 0x9B: case 0x9C: case 0x9D:
 		case 0x9E: case 0x9F: //case ?? wonderful documentation
+			std::cout << "SBC16 n, A";
 			SbcAN(opcode);
 			break;
 		case 0xA0: case 0xA1: case 0xA2: case 0xA3: case 0xA4: case 0xA5:
 		case 0xA6: case 0xA7: case 0xE6:
+			std::cout << "AND n, A";
 			AndAN(opcode);
 			break;
 		case 0xB0: case 0xB1: case 0xB2: case 0xB3: case 0xB4: case 0xB5:
 		case 0xB6: case 0xB7: case 0xF6:
+			std::cout << "OR n, A";
 			OrAN(opcode);
 			break;
 		case 0xA8: case 0xA9: case 0xAA: case 0xAB: case 0xAC: case 0xAD:
 		case 0xAE: case 0xAF: case 0xEE:
+			std::cout << "X0R n, A";
 			XorAN(opcode);
 			break;
 		case 0xB8: case 0xB9: case 0xBA: case 0xBB: case 0xBC: case 0xBD:
 		case 0xBE: case 0xBF: case 0xFE:
+			std::cout << "CP n";
 			CpaN(opcode);
 			break;
 		case 0x04: case 0x0C: case 0x14: case 0x1C: case 0x24: case 0x2C:
 		case 0x34: case 0x3C:
+			std::cout << "INC n";
 			IncN(opcode);
 			break;
 		case 0x05: case 0x0D: case 0x15: case 0x1D: case 0x25: case 0x2D:
 		case 0x35: case 0x3D:
+			std::cout << "DEC n";
 			DecN(opcode);
 			break;
 		case 0x09: case 0x19: case 0x29: case 0x39:
+			std::cout << "ADD n, HL";
 			AddHlN16(opcode);
 			break;
 		case 0xE8:
+			std::cout << "ADD n, SP";
 			AddSpN16(opcode);
 			break;
 		case 0x03: case 0x13: case 0x23: case 0x33:
+			std::cout << "INC16 nn";
 			IncNn16(opcode);
 			break;
 		case 0x0B: case 0x1B: case 0x2B: case 0x3B:
+			std::cout << "DEC16 nn";
 			DecNn16(opcode);
 			break;
 		case 0xCB:
 			Cb(opcode);
 			break;
 		case 0x27:
+			std::cout << "DAA";
 			Daa();
 			break;
 		case 0x2F:
+			std::cout << "CPL";
 			Cpl();
 			break;
 		case 0x3F:
+			std::cout << "CCF";
 			Ccf();
 			break;
 		case 0x37:
+			std::cout << "SCF";
 			Scf();
 			break;
 		case 0x00:
+			std::cout << "NOP";
 			Nop();
 			break;
 		case 0x76:
+			std::cout << "HALT";
 			Halt();
 			break;
 		case 0x10:
 			Ten();
 			break;
 		case 0xF3:
+			std::cout << "DI";
 			Di();
 			break;
 		case 0xFB:
+			std::cout << "EI";
 			Ei();
 			break;
 		case 0x07:
+			std::cout << "RLC n";
 			Rlca();
 			break;
 		case 0x17:
+			std::cout << "RL n";
 			Rla();
 			break;
 		case 0x0F:
+			std::cout << "RRC n";
 			Rrca();
 			break;
 		case 0x1F: 
+			std::cout << "RR n";
 			Rra();
 			break;
 		case 0xC3:
+			std::cout << "JP nn";
 			JpNn();
 			break;
 		case 0xC2: case 0xCA: case 0xD2: case 0xDA:
+			std::cout << "JP cc, nn";
 			JpCcNn(opcode);
 			break;
 		case 0xE9:
+			std::cout << "JP (HL)";
 			JpHl();
 			break;
 		case 0x18:
+			std::cout << "JR n";
 			JrN();
 			break;
 		case 0x20: case 0x28: case 0x30: case 0x38:
+			std::cout << "JR cc, n";
 			JrCcN(opcode);
 			break;
 		case 0xCD:
+			std::cout << "CALL nn";
 			CallNn();
 			break;
 		case 0xC4: case 0xCC: case 0xD4: case 0xDC:
+			std::cout << "CALL cc, nn";
 			CallCcNn(opcode);
 			break;
 		case 0xC9:
+			std::cout << "RET";
 			Ret();
 			break;
 		case 0xC0: case 0xC8: case 0xD0: case 0xD8:
+			std::cout << "RET cc";
 			RetCc(opcode);
 			break;
 		case 0xD9:
+			std::cout << "RET I";
 			RetI();
 			break;
 		default: 
@@ -196,7 +250,7 @@ void CPU::RunInstruction(uint8_t opcode)
 }
 
 //all variations 8 cycles
-//Desc: Put value n into _reg.
+//Desc: Put value nn into n.
 void CPU::LdNnN(uint8_t opcode) {
 	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 	_reg->Write8(_reg, ((opcode + 2) / 8) - 1, value);
@@ -732,133 +786,166 @@ void CPU::Cb(uint8_t opcode) {
 	//_reg->write16(_reg, PC, _reg->read16(_reg, PC) + 1); //increment PC as nested instruction
 	uint8_t cb_opcode = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 1);
+	std::cout << std::hex << (int)cb_opcode << " ";
 	switch (cb_opcode) {
 		case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35:
 		case 0x36: case 0x37:
+			std::cout << "SWAP n";
 			SwapN(cb_opcode);
 			break;
 		case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x05:
 		case 0x06: case 0x07:
+			std::cout << "RL c";
 			RlcN(cb_opcode);
 			break;
 		case 0x10: case 0x11: case 0x12: case 0x13: case 0x14: case 0x15:
 		case 0x16: case 0x17:
+			std::cout << "RL n";
 			RlN(cb_opcode);
 			break;
 		case 0x08: case 0x09: case 0x0A: case 0x0B: case 0x0C: case 0x0D:
 		case 0x0E: case 0x0F:
+			std::cout << "RR c";
 			RrcN(cb_opcode);
 			break;
 		case 0x18: case 0x19: case 0x1A: case 0x1B: case 0x1C: case 0x1D:
 		case 0x1E: case 0x1F:
+			std::cout << "RR n";
 			RrN(cb_opcode);
 			break;
 		case 0x20: case 0x21: case 0x22: case 0x23: case 0x24: case 0x25:
 		case 0x26: case 0x27:
+			std::cout << "SL a";
 			SlaN(cb_opcode);
 			break;
 		case 0x28: case 0x29: case 0x2A: case 0x2B: case 0x2C: case 0x2D:
 		case 0x2E: case 0x2F:
+			std::cout << "SR n";
 			SraN(cb_opcode);
 			break;
 		case 0x38: case 0x39: case 0x3A: case 0x3B: case 0x3C: case 0x3D:
 		case 0x3E: case 0x3F:
+			std::cout << "SRL n";
 			SrlN(cb_opcode);
 			break;
 		case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
 		case 0x46: case 0x47:
+			std::cout << "BIT 0";
 			Bit0(cb_opcode);
 			break;
 		case 0x48: case 0x49: case 0x4A: case 0x4B: case 0x4C: case 0x4D:
 		case 0x4E: case 0x4F:
+			std::cout << "BIT 1";
 			Bit1(cb_opcode);
 			break;
 		case 0x50: case 0x51: case 0x52: case 0x53: case 0x54: case 0x55:
 		case 0x56: case 0x57:
+			std::cout << "BIT 2";
 			Bit2(cb_opcode);
 			break;
 		case 0x58: case 0x59: case 0x5A: case 0x5B: case 0x5C: case 0x5D:
 		case 0x5E: case 0x5F:
+			std::cout << "BIT 3";
 			Bit3(cb_opcode);
 			break;
 		case 0x60: case 0x61: case 0x62: case 0x63: case 0x64: case 0x65:
 		case 0x66: case 0x67:
+			std::cout << "BIT 4";
 			Bit4(cb_opcode);
 			break;
 		case 0x68: case 0x69: case 0x6A: case 0x6B: case 0x6C: case 0x6D:
 		case 0x6E: case 0x6F:
+			std::cout << "BIT 5";
 			Bit5(cb_opcode);
 			break;
 		case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75:
 		case 0x76: case 0x77:
+			std::cout << "BIT 6";
 			Bit6(cb_opcode);
 			break;
 		case 0x78: case 0x79: case 0x7A: case 0x7B: case 0x7C: case 0x7D:
 		case 0x7E: case 0x7F:
+			std::cout << "BIT 7";
 			Bit7(cb_opcode);
 			break;
 		case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85:
 		case 0x86: case 0x87:
+			std::cout << "RES 0";
 			Res0(cb_opcode);
 			break;
 		case 0x88: case 0x89: case 0x8A: case 0x8B: case 0x8C: case 0x8D:
 		case 0x8E: case 0x8F:
+			std::cout << "RES 1";
 			Res1(cb_opcode);
 			break;
 		case 0x90: case 0x91: case 0x92: case 0x93: case 0x94: case 0x95:
 		case 0x96: case 0x97:
+			std::cout << "RES 2";
 			Res2(cb_opcode);
 			break;
 		case 0x98: case 0x99: case 0x9A: case 0x9B: case 0x9C: case 0x9D:
 		case 0x9E: case 0x9F:
+			std::cout << "RES 3";
 			Res3(cb_opcode);
 			break;
 		case 0xA0: case 0xA1: case 0xA2: case 0xA3: case 0xA4: case 0xA5:
 		case 0xA6: case 0xA7:
+			std::cout << "RES 4";
 			Res4(cb_opcode);
 			break;
 		case 0xA8: case 0xA9: case 0xAA: case 0xAB: case 0xAC: case 0xAD:
 		case 0xAE: case 0xAF:
+			std::cout << "RES 5";
 			Res5(cb_opcode);
 			break;
 		case 0xB0: case 0xB1: case 0xB2: case 0xB3: case 0xB4: case 0xB5:
 		case 0xB6: case 0xB7:
+			std::cout << "RES 6";
 			Res6(cb_opcode);
 			break;
 		case 0xB8: case 0xB9: case 0xBA: case 0xBB: case 0xBC: case 0xBD:
 		case 0xBE: case 0xBF:
+			std::cout << "RES 7";
 			Res7(cb_opcode);
 			break;
 		case 0xC0: case 0xC1: case 0xC2: case 0xC3: case 0xC4: case 0xC5:
 		case 0xC6: case 0xC7:
+			std::cout << "SET 0";
 			Set0(cb_opcode);
 			break;
 		case 0xC8: case 0xC9: case 0xCA: case 0xCB: case 0xCC: case 0xCD:
 		case 0xCE: case 0xCF:
+			std::cout << "SET 1";
 			Set1(cb_opcode);
 			break;
 		case 0xD0: case 0xD1: case 0xD2: case 0xD3: case 0xD4: case 0xD5:
 		case 0xD6: case 0xD7:
+			std::cout << "SET 2";
 			Set2(cb_opcode);
 			break;
 		case 0xD8: case 0xD9: case 0xDA: case 0xDB: case 0xDC: case 0xDD:
 		case 0xDE: case 0xDF:
+			std::cout << "SET 3";
 			Set3(cb_opcode);
 			break;
 		case 0xE0: case 0xE1: case 0xE2: case 0xE3: case 0xE4: case 0xE5:
 		case 0xE6: case 0xE7:
+			std::cout << "SET 4";
 			Set4(cb_opcode);
 			break;
 		case 0xE8: case 0xE9: case 0xEA: case 0xEB: case 0xEC: case 0xED:
 		case 0xEE: case 0xEF:
+			std::cout << "SET 5";
 			Set5(cb_opcode);
 			break;
 		case 0xF0: case 0xF1: case 0xF2: case 0xF3: case 0xF4: case 0xF5:
 		case 0xF6: case 0xF7:
+			std::cout << "SET 6";
 			Set6(cb_opcode);
 			break;
 		case 0xF8: case 0xF9: case 0xFA: case 0xFB: case 0xFC: case 0xFD:
 		case 0xFE: case 0xFF:
+			std::cout << "SET 7";
 			Set7(cb_opcode);
 			break;
 		default:
@@ -1299,7 +1386,7 @@ void CPU::Bit0(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		test = _reg->Read8(_reg, cb_opcode - 40);
+		test = _reg->Read8(_reg, cb_opcode - 64);
 		_cycleCounter += 8;
 	}
 	_flags->SetFlag(FLAG_H, true);
@@ -1319,7 +1406,7 @@ void CPU::Bit1(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		test = _reg->Read8(_reg, cb_opcode - 48);
+		test = _reg->Read8(_reg, cb_opcode - 72);
 		_cycleCounter += 8;
 	}
 	_flags->SetFlag(FLAG_H, true);
@@ -1339,7 +1426,7 @@ void CPU::Bit2(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		test = _reg->Read8(_reg, cb_opcode - 50);
+		test = _reg->Read8(_reg, cb_opcode - 80);
 		_cycleCounter += 8;
 	}
 	_flags->SetFlag(FLAG_H, true);
@@ -1359,7 +1446,7 @@ void CPU::Bit3(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		test = _reg->Read8(_reg, cb_opcode - 58);
+		test = _reg->Read8(_reg, cb_opcode - 88);
 		_cycleCounter += 8;
 	}
 	_flags->SetFlag(FLAG_H, true);
@@ -1379,7 +1466,7 @@ void CPU::Bit4(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		test = _reg->Read8(_reg, cb_opcode - 60);
+		test = _reg->Read8(_reg, cb_opcode - 96);
 		_cycleCounter += 8;
 	}
 	_flags->SetFlag(FLAG_H, true);
@@ -1399,7 +1486,7 @@ void CPU::Bit5(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		test = _reg->Read8(_reg, cb_opcode - 68);
+		test = _reg->Read8(_reg, cb_opcode - 104);
 		_cycleCounter += 8;
 	}
 	_flags->SetFlag(FLAG_H, true);
@@ -1419,7 +1506,7 @@ void CPU::Bit6(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		test = _reg->Read8(_reg, cb_opcode - 70);
+		test = _reg->Read8(_reg, cb_opcode - 112);
 		_cycleCounter += 8;
 	}
 	_flags->SetFlag(FLAG_H, true);
@@ -1439,7 +1526,7 @@ void CPU::Bit7(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		test = _reg->Read8(_reg, cb_opcode - 78);
+		test = _reg->Read8(_reg, cb_opcode - 124);
 		_cycleCounter += 8;
 	}
 	_flags->SetFlag(FLAG_H, true);
@@ -1463,9 +1550,9 @@ void CPU::Res0(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 80));
+		n_value = _reg->Read8(_reg, (cb_opcode - 128));
 		n_value = (n_value & ~(1 << 0));
-		_reg->Write8(_reg, (cb_opcode - 80), n_value);
+		_reg->Write8(_reg, (cb_opcode - 128), n_value);
 		_cycleCounter += 8;
 	}
 }
@@ -1486,9 +1573,9 @@ void CPU::Res1(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 88));
+		n_value = _reg->Read8(_reg, (cb_opcode - 136));
 		n_value = (n_value & ~(1 << 1));
-		_reg->Write8(_reg, (cb_opcode - 88), n_value);
+		_reg->Write8(_reg, (cb_opcode - 136), n_value);
 		_cycleCounter += 8;
 	}
 }
@@ -1509,9 +1596,9 @@ void CPU::Res2(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 90));
+		n_value = _reg->Read8(_reg, (cb_opcode - 144));
 		n_value = (n_value & ~(1 << 2));
-		_reg->Write8(_reg, (cb_opcode - 90), n_value);
+		_reg->Write8(_reg, (cb_opcode - 144), n_value);
 		_cycleCounter += 8;
 	}
 }
@@ -1532,9 +1619,9 @@ void CPU::Res3(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 98));
+		n_value = _reg->Read8(_reg, (cb_opcode - 152));
 		n_value = (n_value & ~(1 << 3));
-		_reg->Write8(_reg, (cb_opcode - 98), n_value);
+		_reg->Write8(_reg, (cb_opcode - 152), n_value);
 		_cycleCounter += 8;
 	}
 }
@@ -1555,9 +1642,9 @@ void CPU::Res4(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 100));
+		n_value = _reg->Read8(_reg, (cb_opcode - 160));
 		n_value = (n_value & ~(1 << 4));
-		_reg->Write8(_reg, (cb_opcode - 100), n_value);
+		_reg->Write8(_reg, (cb_opcode - 160), n_value);
 		_cycleCounter += 8;
 	}
 }
@@ -1578,9 +1665,9 @@ void CPU::Res5(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 108));
+		n_value = _reg->Read8(_reg, (cb_opcode - 168));
 		n_value = (n_value & ~(1 << 5));
-		_reg->Write8(_reg, (cb_opcode - 108), n_value);
+		_reg->Write8(_reg, (cb_opcode - 168), n_value);
 		_cycleCounter += 8;
 	}
 }
@@ -1601,9 +1688,9 @@ void CPU::Res6(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 110));
+		n_value = _reg->Read8(_reg, (cb_opcode - 176));
 		n_value = (n_value & ~(1 << 6));
-		_reg->Write8(_reg, (cb_opcode - 110), n_value);
+		_reg->Write8(_reg, (cb_opcode - 176), n_value);
 		_cycleCounter += 8;
 	}
 }
@@ -1624,9 +1711,9 @@ void CPU::Res7(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 118));
+		n_value = _reg->Read8(_reg, (cb_opcode - 184));
 		n_value = (n_value & ~(1 << 7)) | (0 << 7);
-		_reg->Write8(_reg, (cb_opcode - 118), n_value);
+		_reg->Write8(_reg, (cb_opcode - 184), n_value);
 		_cycleCounter += 8;
 	}
 }
@@ -1867,6 +1954,7 @@ void CPU::JrN() {
 void CPU::JrCcN(uint8_t opcode) {
 	switch (opcode) {
 	case 0x20:
+		std::cout << " " << (bool)_flags->GetFlag(FLAG_Z);
 		if (_flags->GetFlag(FLAG_Z) == 0) {
 			JrN();
 		}

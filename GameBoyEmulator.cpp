@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include <Windows.h>
 #include "CPU.h"
 constexpr auto BIOS_FILE_PATH = "dmg_boot.bin";
 constexpr auto BIOS_SKIP = false;
@@ -21,9 +22,11 @@ int main()
     //game loop
     do {
         uint8_t opcode = mmu->ReadMemory8(mmu, reg->Read8(reg, PC));
-        std::cout << "Running: " << std::hex << (int)opcode << std::endl;
+        std::cout << "Execute: " << std::hex << (int)opcode << " ";
         reg->Write16(reg, PC, (reg->Read16(reg, PC) + 1));
         cpu->RunInstruction(opcode);
+        std::cout << std::endl;
+        Sleep(500);
     } while (reg->Read16(reg, PC) != 0x0100);   //while not the end of bios
 
     mmu->Destroy(mmu);

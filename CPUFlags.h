@@ -22,7 +22,7 @@ class CPUFlags {
 	std::bitset<8> _mask7{ 0b1000'0000 }; 
 	std::bitset<8> GetMasker(int mask);
 public:
-	std::bitset<8> flags{ }; //8 bit comparer
+	std::bitset<8> flags{ 0b000'0000 }; //8 bit comparer
 	int GetFlag(int mask);
 	void SetFlag(int mask, bool isOn);
 	void BitFlip(int mask);
