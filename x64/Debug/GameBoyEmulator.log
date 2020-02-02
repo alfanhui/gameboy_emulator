@@ -1,5 +1,0 @@
-﻿  CPU.cpp
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(380,33): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(1010,6): warning C4804: '>': unsafe use of type 'bool' in operation
-C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\CPU.cpp(1915,15): warning C4244: 'initializing': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-  GameBoyEmulator.vcxproj -> C:\Users\Alfanhui\Nextcloud\Code\cpp\gameboy_emulator\GameBoyEmulator\x64\Debug\GameBoyEmulator.exe
