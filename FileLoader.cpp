@@ -3,20 +3,21 @@
 #include <fstream>
 #include <string>
 
-char* FileLoader::ReadFile(std::string filePath) {
+uint8_t* FileLoader::ReadFile(std::string filePath) {
 
     std::ifstream inputFile(filePath, std::ifstream::binary);
     if (inputFile) {
         inputFile.seekg(0, inputFile.end);
-        int bufferLength = inputFile.tellg();
+        signed int bufferLength = (int)inputFile.tellg();
         inputFile.seekg(0, inputFile.beg); //put seeker at beginning.
 
-        char* buffer = new char[bufferLength];
+        uint8_t* buffer = new uint8_t[bufferLength];
 
         inputFile.read((char*)buffer, bufferLength);
         inputFile.close();
         return buffer;
     }
+    inputFile.close();
     return 0;
 }
 
@@ -24,17 +25,18 @@ int FileLoader::SizeOfFile(std::string filePath) {
     std::ifstream inputFile(filePath, std::ifstream::binary);
     if (inputFile) {
         inputFile.seekg(0, inputFile.end);
-        int length = inputFile.tellg();
+        signed int length = (int)inputFile.tellg();
         inputFile.close();
         return length;
     }
     else {
+        inputFile.close();
         return 0;
     }
 }
 
 
-void FileLoader::PrintPointerHex(char* buffer, int bufferLength, int location = -1) {
+void FileLoader::PrintPointerHex(uint8_t* buffer, int bufferLength, int location = -1) {
     if (location != -1) {
         std::cout << std::hex << (int)buffer[location] << std::endl;
     }

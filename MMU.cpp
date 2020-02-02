@@ -15,7 +15,7 @@ class mmuException : public std::exception
 
 void MMU::LoadBios(MMU* mmu, std::string filePath) {
 	FileLoader fileLoader;
-	char* bios = fileLoader.ReadFile(filePath);
+	uint8_t* bios = fileLoader.ReadFile(filePath);
 	try {
 		memcpy(mmu->bios, bios, 0xFF);
 		if (sizeof(mmu->bios) != 256) {
@@ -26,6 +26,15 @@ void MMU::LoadBios(MMU* mmu, std::string filePath) {
 	} 
 	std::cout << "BIOS Loaded.\n";
 }
+
+void MMU::LoadCartridge(MMU* mmu, std::string filePath) {
+	FileLoader fileLoader;
+	uint8_t* rom = fileLoader.ReadFile(filePath);
+	std::cout << "ROM size: " << fileLoader.SizeOfFile(filePath) << " RAM size: " << sizeof(mmu->rom) << std::endl;
+	memcpy(mmu->rom, rom, fileLoader.SizeOfFile(filePath));
+	std::cout << "ROM Loaded.\n";
+}
+
 
 //uint8_t MMU::ReadBios8(MMU* mmu, uint8_t addr) {
 //	return *(mmu->bios + addr);

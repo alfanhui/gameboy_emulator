@@ -15,7 +15,7 @@ constexpr auto DE = 0x02;
 constexpr auto HL = 0x04;
 constexpr auto AF = 0x06;
 constexpr auto SP = 0x08;
-constexpr auto PC = 0x10;
+constexpr auto PC = 0x0A;
 
 struct CPURegister
 {

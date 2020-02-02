@@ -5,7 +5,7 @@ void CPU::RunInstruction(uint8_t opcode)
 {
 	switch (opcode) {
 		case 0x06: case 0x0E: case 0x16: case 0x1E:	case 0x26: case 0x2E:
-			std::cout << "LD nn, n";
+			std::cout << "LD n, nn";
 			LdNnN(opcode); 
 			break;
 		case 0x36: case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: 
@@ -17,16 +17,16 @@ void CPU::RunInstruction(uint8_t opcode)
 		case 0x6A: case 0x6B: case 0x6C: case 0x6E: case 0x70: case 0x71: 
 		case 0x72: case 0x73: case 0x74: case 0x75: case 0x7F: case 0x78: 
 		case 0x79: case 0x7A: case 0x7B: case 0x7C: case 0x7D: case 0x7E:
-			std::cout << "LD r2, r1";
+			std::cout << "LD r1, r2";
 			LdR1R2(opcode);
 			break;
 		case 0x0A: case 0x1A: case 0xFA: case 0x3E:
-			std::cout << "LD n, A";
+			std::cout << "LD A, n";
 			LdAN(opcode);
 			break;
 		case 0x47: case 0x4F: case 0x57: case 0x5F: case 0x67: case 0x6F:
 		case 0x02: case 0x12: case 0x77: case 0xEA:
-			std::cout << "LD A, n";
+			std::cout << "LD n, A";
 			LdNA(opcode);
 			break;
 		case 0xF2: 
@@ -54,27 +54,27 @@ void CPU::RunInstruction(uint8_t opcode)
 			LdHlposA();
 			break;
 		case 0xE0:
-			std::cout << "LD (0xFF00 + n), A";
+			std::cout << "LD A, (0xFF00 + n)";
 			LdhNA(opcode);
 			break;
 		case 0xF0: 
-			std::cout << "LD A, (0xFF00 + n)";
+			std::cout << "LD (0xFF00 + n), A";
 			LdhAN(opcode);
 			break;
 		case 0x01: case 0x11: case 0x21: case 0x31:
-			std::cout << "LD16 nn, A";
+			std::cout << "LD16 N, nn";
 			LdNNn16(opcode);
 			break;
 		case 0xF9:
-			std::cout << "LD16 HL, (SP + n)";
+			std::cout << "LD16 (SP + n), HL";
 			LdSpHl(opcode);
 			break;
 		case 0xF8: 
-			std::cout << "LD16 (SP + n), HL";
+			std::cout << "LD16 HL, (SP + n)";
 			LdHlSpn(opcode);
 			break;
 		case 0x08: 
-			std::cout << "LD16 SP, (nn)";
+			std::cout << "LD16 (nn), SP";
 			LdNnSp(opcode);
 			break;
 		case 0xF5: case 0xC5: case 0xD5: case 0xE5:
@@ -84,39 +84,40 @@ void CPU::RunInstruction(uint8_t opcode)
 		case 0xF1: case 0xC1: case 0xD1: case 0xE1:
 			std::cout << "POP16 nn";
 			PopNn(opcode);
+			break;
 		case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85: 
 		case 0x86: case 0x87: case 0xC6:
-			std::cout << "ADD16 n, A";
+			std::cout << "ADD16 A, n";
 			AddAN(opcode);
 			break;
 		case 0x88: case 0x89: case 0x8A: case 0x8B: case 0x8C: case 0x8D:
 		case 0x8E: case 0x8F: case 0xCE:
-			std::cout << "ADC16 n, A";
+			std::cout << "ADC16 A, n";
 			AbcAN(opcode);
 			break;
 		case 0x90: case 0x91: case 0x92: case 0x93: case 0x94: case 0x95:
 		case 0x96: case 0x97: case 0xD6:
-			std::cout << "SUB16 n, A";
+			std::cout << "SUB16 A, n";
 			SubAN(opcode);
 			break;
 		case 0x98: case 0x99: case 0x9A: case 0x9B: case 0x9C: case 0x9D:
 		case 0x9E: case 0x9F: //case ?? wonderful documentation
-			std::cout << "SBC16 n, A";
+			std::cout << "SBC16 A, n";
 			SbcAN(opcode);
 			break;
 		case 0xA0: case 0xA1: case 0xA2: case 0xA3: case 0xA4: case 0xA5:
 		case 0xA6: case 0xA7: case 0xE6:
-			std::cout << "AND n, A";
+			std::cout << "AND A, n";
 			AndAN(opcode);
 			break;
 		case 0xB0: case 0xB1: case 0xB2: case 0xB3: case 0xB4: case 0xB5:
 		case 0xB6: case 0xB7: case 0xF6:
-			std::cout << "OR n, A";
+			std::cout << "OR A, n";
 			OrAN(opcode);
 			break;
 		case 0xA8: case 0xA9: case 0xAA: case 0xAB: case 0xAC: case 0xAD:
 		case 0xAE: case 0xAF: case 0xEE:
-			std::cout << "X0R n, A";
+			std::cout << "X0R A, n";
 			XorAN(opcode);
 			break;
 		case 0xB8: case 0xB9: case 0xBA: case 0xBB: case 0xBC: case 0xBD:
@@ -135,11 +136,11 @@ void CPU::RunInstruction(uint8_t opcode)
 			DecN(opcode);
 			break;
 		case 0x09: case 0x19: case 0x29: case 0x39:
-			std::cout << "ADD n, HL";
+			std::cout << "ADD HL, n";
 			AddHlN16(opcode);
 			break;
 		case 0xE8:
-			std::cout << "ADD n, SP";
+			std::cout << "ADD SP, n";
 			AddSpN16(opcode);
 			break;
 		case 0x03: case 0x13: case 0x23: case 0x33:
@@ -193,7 +194,7 @@ void CPU::RunInstruction(uint8_t opcode)
 			Rlca();
 			break;
 		case 0x17:
-			std::cout << "RL n";
+			std::cout << "RL A";
 			Rla();
 			break;
 		case 0x0F:
@@ -255,7 +256,7 @@ void CPU::LdNnN(uint8_t opcode) {
 	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 	_reg->Write8(_reg, ((opcode + 2) / 8) - 1, value);
 	_cycleCounter += 8;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 1);
+	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
 }
 
 //Put value r2 into r1.
@@ -400,7 +401,7 @@ void CPU::LdhNA(uint8_t opcode) {
 	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 	_mmu->WriteMemory8(_mmu, (0xFF00 + value), _reg->a);
 	_cycleCounter += 12;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
+	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 1);
 }
 
 //Put memory address $FF00 + n into A. [12 cycles]
@@ -447,6 +448,7 @@ void CPU::LdNnSp(uint8_t opcode) {
 
 //Push register pair nn onto stack. Decrement Stack Pointer (SP) twice [16 cycles]
 void CPU::PushNn(uint8_t opcode) {
+	std::cout << " (" << std::hex << ((int)floor(opcode / 8) - 24) << ") ";
 	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, SP), _reg->Read16(_reg, ((int)floor(opcode / 8) - 24)));
 	_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2);
 	_cycleCounter += 16;
@@ -454,6 +456,7 @@ void CPU::PushNn(uint8_t opcode) {
 
 //Pop two bytes off stack into register pair nn. Increment Stack Pointer (SP) twice. [12 cycles]
 void CPU::PopNn(uint8_t opcode) {
+	std::cout << " (" << std::hex << (uint16_t)((int)floor(opcode / 8) - 24) << ") ";
 	_reg->Write16(_reg, (uint16_t)((int)floor(opcode / 8) - 24), _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, SP)));
 	_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) + 2);
 	_cycleCounter += 12;
@@ -478,14 +481,15 @@ void CPU::AddAN(uint8_t opcode) {
 		n = _reg->Read8(_reg, (opcode - 128)); //[4 cycles]
 		_cycleCounter += 4;
 	}
-	uint8_t value = n + _reg->a;
-	_reg->Write8(_reg, A, value);
+	uint8_t original_a = _reg->a;
+	uint8_t new_value = n + _reg->a;
+	_reg->Write8(_reg, A, new_value);
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, (value > 0xFF));
-	_flags->SetFlag(FLAG_H, (((_reg->a & 0xF) + (n & 0xF)) > 0xF));
+	_flags->SetFlag(FLAG_C, (new_value > 0xFF));
+	_flags->SetFlag(FLAG_H, (((original_a & 0xF) + (n & 0xF)) > 0xF));
 	_flags->SetFlag(FLAG_N, false); //Not a subtraction method
-	_flags->SetFlag(FLAG_Z, (value == 0));
+	_flags->SetFlag(FLAG_Z, (new_value == 0));
 }
 
 //Add n + carry flag to A.
@@ -507,14 +511,15 @@ void CPU::AbcAN(uint8_t opcode) {
 		n = _reg->Read8(_reg, (opcode - 136));
 		_cycleCounter += 4;
 	}
-	uint8_t value = n + _flags->GetFlag(FLAG_C) + _reg->a;
-	_reg->Write8(_reg, A, (_reg->a + value));
+	uint8_t original_a = _reg->a;
+	uint8_t new_value = n + _flags->GetFlag(FLAG_C) + _reg->a;
+	_reg->Write8(_reg, A, (_reg->a + new_value));
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, (value) > 0xFF);
-	_flags->SetFlag(FLAG_H, (((_reg->a & 0xF) + (n & 0xF) + (_flags->GetFlag(FLAG_C)) > 0xF)));
+	_flags->SetFlag(FLAG_C, (new_value) > 0xFF);
+	_flags->SetFlag(FLAG_H, (((original_a & 0xF) + (n & 0xF) + (_flags->GetFlag(FLAG_C)) > 0xF)));
 	_flags->SetFlag(FLAG_N, false); //Not a subtraction method
-	_flags->SetFlag(FLAG_Z, (value) == 0);
+	_flags->SetFlag(FLAG_Z, (new_value) == 0);
 }
 
 //Subtract n from A. 
@@ -536,14 +541,15 @@ void CPU::SubAN(uint8_t opcode){
 		n = _reg->Read8(_reg, (opcode - 144)); //4 cycles
 		_cycleCounter += 4;
 	}
-	int8_t value = (int8_t)(_reg->a - n); //we need to check if goes beyond neg for flag wavin'
-	_reg->Write8(_reg, A, (uint8_t)value);
+	int8_t original_a = (int8_t)(_reg->a);
+	int8_t new_value = (int8_t)(_reg->a - n); //we need to check if goes beyond neg for flag wavin'
+	_reg->Write8(_reg, A, (uint8_t)new_value);
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, (value < 0));
-	_flags->SetFlag(FLAG_H, ((_reg->a & 0xF) < (n & 0xF)));
+	_flags->SetFlag(FLAG_C, (new_value < 0));
+	_flags->SetFlag(FLAG_H, ((original_a & 0xF) < (n & 0xF)));
 	_flags->SetFlag(FLAG_N, true);
-	_flags->SetFlag(FLAG_Z, (value == 0));
+	_flags->SetFlag(FLAG_Z, (new_value == 0));
 }
 
 //Subtract n + carry flag from A. 
@@ -562,14 +568,15 @@ void CPU::SbcAN(uint8_t opcode) {
 		n = _reg->Read8(_reg, (opcode - 152)); //4 cycles
 		_cycleCounter += 4;
 	}
-	int8_t value = (int8_t)(_reg->a - (n + _flags->GetFlag(FLAG_C))); //we need to check if goes beyond neg for flag wavin'
-	_reg->Write8(_reg, A, (uint8_t)value);
+	int8_t original_a = (int8_t)_reg->a;
+	int8_t new_value = (int8_t)(_reg->a - (n + _flags->GetFlag(FLAG_C))); //we need to check if goes beyond neg for flag wavin'
+	_reg->Write8(_reg, A, (uint8_t)new_value);
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, (value < 0));
-	_flags->SetFlag(FLAG_H, ((_reg->a & 0xF) < ((n + _flags->GetFlag(FLAG_C)) &0xF)));
+	_flags->SetFlag(FLAG_C, (new_value < 0));
+	_flags->SetFlag(FLAG_H, ((original_a & 0xF) < ((n + _flags->GetFlag(FLAG_C)) &0xF)));
 	_flags->SetFlag(FLAG_N, true);
-	_flags->SetFlag(FLAG_Z, (value == 0));
+	_flags->SetFlag(FLAG_Z, (new_value == 0));
 }
 
 //Logically AND n with A, result in A.
@@ -591,14 +598,15 @@ void CPU::AndAN(uint8_t opcode) {
 		n = _reg->Read8(_reg, (opcode - 160)); //4 cycles
 		_cycleCounter += 4;
 	}
-	uint8_t value = (_reg->a & n);
-	_reg->Write8(_reg, A, value);
+	uint8_t original_a = _reg->a;
+	uint8_t new_value = (_reg->a & n);
+	_reg->Write8(_reg, A, new_value);
 
 	//Set flags
 	_flags->SetFlag(FLAG_C, false);
-	_flags->SetFlag(FLAG_H, (((_reg->a & 0xF) & (n & 0xF)) > 0xF));
+	_flags->SetFlag(FLAG_H, (((original_a & 0xF) & (n & 0xF)) > 0xF));
 	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (value == 0));
+	_flags->SetFlag(FLAG_Z, (new_value == 0));
 }
 
 // Logical OR n with register A, result in A.
@@ -667,8 +675,9 @@ void CPU::CpaN(uint8_t opcode) {
 		_cycleCounter += 8;
 	}
 	else if (opcode == 0xFE) { //edge case [8 cycles]
-		n = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, SP));
+		n = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 		_cycleCounter += 8;
+		_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 1);
 	}
 	else if (opcode == 0xBF) { //A,A edge case [4 cycles]
 		n = _reg->Read8(_reg, (opcode - 185));
@@ -733,7 +742,7 @@ void CPU::DecN(uint8_t opcode) {
 	_reg->Write8(_reg, n, (value - 1));
 	//Set flags
 	//FLAG_C not affected
-	_flags->SetFlag(FLAG_H, ((value & 0xF) == 0)); //Not sure if this is correct
+	_flags->SetFlag(FLAG_H, (((value - 1) & 0xF) == 0xF)); //Not sure if this is correct
 	_flags->SetFlag(FLAG_N, true);
 	_flags->SetFlag(FLAG_Z, ((value - 1) == 0));
 }
@@ -783,9 +792,8 @@ void CPU::DecNn16(uint8_t opcode) {
 
 //No cycles
 void CPU::Cb(uint8_t opcode) {
-	//_reg->write16(_reg, PC, _reg->read16(_reg, PC) + 1); //increment PC as nested instruction
 	uint8_t cb_opcode = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 1);
+	_reg->array[PC]++;
 	std::cout << std::hex << (int)cb_opcode << " ";
 	switch (cb_opcode) {
 		case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35:
@@ -1012,9 +1020,9 @@ void CPU::Daa() {
 	}
 	_reg->Write8(_reg, A, a_value);
 
-	_flags->SetFlag(FLAG_C, _reg->a > 0xFF);
+	_flags->SetFlag(FLAG_C, a_value > 0xFF);
 	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, _reg->a == 0);
+	_flags->SetFlag(FLAG_N, a_value == 0);
 	_cycleCounter += 4;
 }
 
@@ -1112,7 +1120,7 @@ void CPU::Rla() {
 
 	_flags->SetFlag(FLAG_H, false);
 	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	_flags->SetFlag(FLAG_Z, false); //against the grain
 	_cycleCounter += 4;
 }
 
@@ -1904,10 +1912,9 @@ void CPU::Set7(uint8_t cb_opcode) {
 
 //Jump to address nn [12 cycles]
 void CPU::JpNn() {
-	uint8_t address = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write16(_reg, PC, address);
+	uint8_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
+	_reg->Write16(_reg, PC, addr);
 	_cycleCounter += 12;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
 }
 
 //Jump to address n if following condition is true: [12 cycles, maybe already recorded by JpNn]
@@ -1938,15 +1945,15 @@ void CPU::JpCcNn(uint8_t opcode) {
 
 //Jump to address contained in HL [4 cycles]
 void CPU::JpHl() {
-	uint8_t address = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, HL));
-	_reg->Write16(_reg, PC, address);
+	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, HL));
+	_reg->Write16(_reg, PC, addr);
 	_cycleCounter += 4;
 }
 
 //Add n to current address and jump to it [8 cycles]
 void CPU::JrN() {
-	uint16_t address = _reg->Read16(_reg, PC) + (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write16(_reg, PC, address);
+ 	uint16_t addr = _reg->Read16(_reg, PC) + (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC)); //+1 out?
+	_reg->Write16(_reg, PC, addr + 1);
 	_cycleCounter += 8;
 }
 
@@ -1954,22 +1961,25 @@ void CPU::JrN() {
 void CPU::JrCcN(uint8_t opcode) {
 	switch (opcode) {
 	case 0x20:
-		std::cout << " " << (bool)_flags->GetFlag(FLAG_Z);
+		std::cout << " NZ " << (bool)_flags->GetFlag(FLAG_Z);
 		if (_flags->GetFlag(FLAG_Z) == 0) {
 			JrN();
 		}
 		break;
 	case 0x28:
+		std::cout << " Z " << (bool)_flags->GetFlag(FLAG_Z);
 		if (_flags->GetFlag(FLAG_Z) == 1) {
 			JrN();
 		}
 		break;
 	case 0x30:
+		std::cout << " NC " << (bool)_flags->GetFlag(FLAG_C);
 		if (_flags->GetFlag(FLAG_C) == 0) {
 			JrN();
 		}
 		break;
 	case 0x38:
+		std::cout << " C " << (bool)_flags->GetFlag(FLAG_C);
 		if (_flags->GetFlag(FLAG_C) == 1) {
 			JrN();
 		}
@@ -1979,8 +1989,14 @@ void CPU::JrCcN(uint8_t opcode) {
 
 //Push address of next instruction onto stack and then  jump to address nn. [12 cycles]
 void CPU::CallNn() {
+	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
+	//_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2);
+	//_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, SP), _reg->Read16(_reg, PC));
+	//_reg->Write16(_reg, PC, addr);
+	
 	_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2);
 	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, SP), _reg->Read16(_reg, PC));
+	_reg->array[PC]+=2;
 	_cycleCounter += 12;
 }
 

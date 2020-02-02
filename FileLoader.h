@@ -3,8 +3,8 @@
 class FileLoader
 {
 	public:
-		char* ReadFile(std::string fileName);
+		uint8_t* ReadFile(std::string fileName);
 		int SizeOfFile(std::string filePath);
-		void PrintPointerHex(char* buffer, int bufferLength, int location);
+		void PrintPointerHex(uint8_t* buffer, int bufferLength, int location);
 };
 

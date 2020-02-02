@@ -2,5 +2,6 @@
 *.bios
 *.rom
 /Debug/*
+*.gb
 /.vs/*
 x64
