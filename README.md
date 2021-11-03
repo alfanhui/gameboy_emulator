@@ -1,16 +1,20 @@
 # gameboy_emulator
 
-A GameBoy Emulator in C++
+A Game Boy Emulator in C++ using only an Assembly Language Commands, Timings and Opcodes manual titled _Game Boy™ CPU Manual_ by: Pan of Anthrox, GABY, Marat Fayzullin, Pascal Felber, Paul Robson, Martin Korth, kOOPa, Bowser.
 
 ## Aim
 
 * Find out how emulators work
 * Further knowledge about low-level computing
-* To play one my favourite GameBoy games [Donkey Kong 1994](https://en.wikipedia.org/wiki/Donkey_Kong_(1994_video_game))
+* To play one my favourite Game Boy games [Donkey Kong 1994](https://en.wikipedia.org/wiki/Donkey_Kong_(1994_video_game))
+
+## Visual Studio
+
+Please use at least MicroSoft Visual Studio 2019 version 16.11. To get started, open this file as project/solution: [./GameBoyEmulator/GameBoyEmulator.sln](./GameBoyEmulator/GameBoyEmulator.sln)
 
 ## Tests
 
-See GameBoyEmulatorTests for unit tests. This was implemented after getting stuck with buggy opcodes implementation.
+See [./GameBoyEmulatorTests](./GameBoyEmulatorTests) for unit tests. This was implemented after getting stuck with buggy opcodes implementation.
 
 ### Rom Tests
 
