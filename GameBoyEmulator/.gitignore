@@ -1,9 +1,8 @@
 *.bin
 *.bios
 *.rom
-*.gb
-*.pdf
 /Debug/*
+*.gb
 /.vs/*
 x64/
 packages/
