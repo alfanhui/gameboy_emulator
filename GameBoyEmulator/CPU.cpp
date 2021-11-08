@@ -4,9 +4,29 @@
 void CPU::RunInstruction(uint8_t opcode)
 {
 	switch (opcode) {
-		case 0x06: case 0x0E: case 0x16: case 0x1E:	case 0x26: case 0x2E:
-			std::cout << "LD n, nn";
-			LdNnN(opcode); 
+		case 0x06: 
+			std::cout << "LD B, nn";
+			LdBnn();
+		break; 
+		case 0x0E: 
+			std::cout << "LD C, nn";
+			LdCnn();
+		break; 
+		case 0x16: 
+			std::cout << "LD D, nn";
+			LdDnn();
+		break; 
+		case 0x1E:	
+			std::cout << "LD E, nn";
+			LdEnn();
+		break; 
+		case 0x26: 
+			std::cout << "LD H, nn";
+			LdHnn();
+		break; 
+		case 0x2E:
+			std::cout << "LD L, nn";
+			LdLnn(); 
 			break;
 		case 0x36: case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: 
 		case 0x45: case 0x46: case 0x48: case 0x49: case 0x4A: case 0x4B:
@@ -93,7 +113,7 @@ void CPU::RunInstruction(uint8_t opcode)
 		case 0x88: case 0x89: case 0x8A: case 0x8B: case 0x8C: case 0x8D:
 		case 0x8E: case 0x8F: case 0xCE:
 			std::cout << "ADC16 A, n";
-			AbcAN(opcode);
+			AdcAN(opcode);
 			break;
 		case 0x90: case 0x91: case 0x92: case 0x93: case 0x94: case 0x95:
 		case 0x96: case 0x97: case 0xD6:
@@ -250,13 +270,52 @@ void CPU::RunInstruction(uint8_t opcode)
 	}
 }
 
-//all variations 8 cycles
 //Desc: Put value nn into n.
-void CPU::LdNnN(uint8_t opcode) {
-	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write8(_reg, ((opcode + 2) / 8) - 1, value);
+void CPU::LdBnn() {
+	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
+	_reg->Write8(_reg, addr, _reg->b);
 	_cycleCounter += 8;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
+	_reg->array[PC]++;
+}
+
+//Desc: Put value nn into n.
+void CPU::LdCnn() {
+	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
+	_reg->Write8(_reg, addr, _reg->c);
+	_cycleCounter += 8;
+	_reg->array[PC]++;
+}
+
+//Desc: Put value nn into n.
+void CPU::LdDnn() {
+	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
+	_reg->Write8(_reg, addr, _reg->d);
+	_cycleCounter += 8;
+	_reg->array[PC]++;
+}
+
+//Desc: Put value nn into n.
+void CPU::LdEnn() {
+	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
+	_reg->Write8(_reg, addr, _reg->e);
+	_cycleCounter += 8;
+	_reg->array[PC]++;
+}
+
+//Desc: Put value nn into n.
+void CPU::LdHnn() {
+	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
+	_reg->Write8(_reg, addr, _reg->h);
+	_cycleCounter += 8;
+	_reg->array[PC]++;
+}
+
+//Desc: Put value nn into n.
+void CPU::LdLnn() {
+	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
+	_reg->Write8(_reg, addr, _reg->l);
+	_cycleCounter += 8;
+	_reg->array[PC]++;
 }
 
 //Put value r2 into r1.
@@ -335,11 +394,11 @@ void CPU::LdNA(uint8_t opcode) {
 	uint16_t n = (((opcode + 1) / 8) - 9);
 	switch (opcode) {
 	case 0x02:
-		n = _reg->Read16(_reg,BC); //8 cycles
+		n = _reg->Read16(_reg, BC); //8 cycles
 		_cycleCounter += 8;
 		break;
 	case 0x12:
-		n = _reg->Read16(_reg,DE); //8 cycles 
+		n = _reg->Read16(_reg, DE); //8 cycles 
 		_cycleCounter += 8;
 		break;
 	case 0x77:
@@ -431,10 +490,10 @@ void CPU::LdHlSpn(uint8_t opcode) {
 	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 	_reg->Write16(_reg, HL, _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, SP) + value));
 	//Set flags
-	_flags->SetFlag(FLAG_C, (_reg->Read16(_reg, SP) + value) > 0xFF);
-	_flags->SetFlag(FLAG_C, ((_reg->Read16(_reg, SP) & 0xF) + (value & 0xF)) > 0xF);
-	_flags->SetFlag(FLAG_Z, false);
-	_flags->SetFlag(FLAG_N, false);
+	_flags->SetZeroAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	(_reg->Read16(_reg, SP) + value) > 0xFF ? _flags->SetOneAtMask(FLAG_H): _flags->SetZeroAtMask(FLAG_H); //TODO: Check condition
+	(((_reg->Read16(_reg, SP) & 0xF) + (value & 0xF)) > 0xF) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //TODO: Check condition
 	_cycleCounter += 12;
 	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
 }
@@ -486,14 +545,18 @@ void CPU::AddAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, new_value);
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, (new_value > 0xFF));
-	_flags->SetFlag(FLAG_H, (((original_a & 0xF) + (n & 0xF)) > 0xF));
-	_flags->SetFlag(FLAG_N, false); //Not a subtraction method
-	_flags->SetFlag(FLAG_Z, (new_value == 0));
+	if (new_value == 0) { 
+		_flags->SetOneAtMask(FLAG_Z); }
+	_flags->SetZeroAtMask(FLAG_N); //Not a subtraction method
+	if ((((original_a & 0xF) + (n & 0xF)) > 0xF)) { 
+		_flags->SetOneAtMask(FLAG_H); }
+	if (new_value > 0xFF){ 
+		_flags->SetOneAtMask(FLAG_C);
+	}
 }
 
 //Add n + carry flag to A.
-void CPU::AbcAN(uint8_t opcode) {
+void CPU::AdcAN(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0x8E) { //edge case [8 cycles]
 		n = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
@@ -516,10 +579,14 @@ void CPU::AbcAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, (_reg->a + new_value));
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, (new_value) > 0xFF);
-	_flags->SetFlag(FLAG_H, (((original_a & 0xF) + (n & 0xF) + (_flags->GetFlag(FLAG_C)) > 0xF)));
-	_flags->SetFlag(FLAG_N, false); //Not a subtraction method
-	_flags->SetFlag(FLAG_Z, (new_value) == 0);
+	if ((new_value) == 0) { 
+		_flags->SetOneAtMask(FLAG_Z); }
+	_flags->SetZeroAtMask(FLAG_N); //Not a subtraction method
+	if ((((original_a & 0xF) + (n & 0xF) + (_flags->GetFlag(FLAG_C)) > 0xF))) { 
+		_flags->SetOneAtMask(FLAG_H); }
+	if ((new_value) > 0xFF){
+		_flags->SetOneAtMask(FLAG_C);
+	}
 }
 
 //Subtract n from A. 
@@ -546,10 +613,16 @@ void CPU::SubAN(uint8_t opcode){
 	_reg->Write8(_reg, A, (uint8_t)new_value);
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, (new_value < 0));
-	_flags->SetFlag(FLAG_H, ((original_a & 0xF) < (n & 0xF)));
-	_flags->SetFlag(FLAG_N, true);
-	_flags->SetFlag(FLAG_Z, (new_value == 0));
+	if ((new_value == 0)) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetOneAtMask(FLAG_N);
+	if (((original_a & 0xF) < (n & 0xF))) {
+		_flags->SetOneAtMask(FLAG_H);
+	}
+	if ((new_value < 0)) { //TODO is this set if no borrow?
+		_flags->SetOneAtMask(FLAG_C);
+	}
 }
 
 //Subtract n + carry flag from A. 
@@ -573,10 +646,16 @@ void CPU::SbcAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, (uint8_t)new_value);
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, (new_value < 0));
-	_flags->SetFlag(FLAG_H, ((original_a & 0xF) < ((n + _flags->GetFlag(FLAG_C)) &0xF)));
-	_flags->SetFlag(FLAG_N, true);
-	_flags->SetFlag(FLAG_Z, (new_value == 0));
+	if ((new_value == 0)) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetOneAtMask(FLAG_N);
+	if (((original_a & 0xF) < ((n + _flags->GetFlag(FLAG_C)) & 0xF))) {
+		_flags->SetOneAtMask(FLAG_H);
+	}
+	if ((new_value < 0)) { //TODO is this set if no borrow?
+		_flags->SetOneAtMask(FLAG_C);
+	}
 }
 
 //Logically AND n with A, result in A.
@@ -603,10 +682,12 @@ void CPU::AndAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, new_value);
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, false);
-	_flags->SetFlag(FLAG_H, (((original_a & 0xF) & (n & 0xF)) > 0xF));
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (new_value == 0));
+	if ((new_value == 0)) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	_flags->SetZeroAtMask(FLAG_C);
 }
 
 // Logical OR n with register A, result in A.
@@ -632,10 +713,12 @@ void CPU::OrAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, value);
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, false);
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (value == 0));
+	if ((value == 0)) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
+	_flags->SetZeroAtMask(FLAG_C);
 }
 
 //Logical exclusive OR n with register A, result in A.
@@ -661,13 +744,16 @@ void CPU::XorAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, value);
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, false);
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (value == 0));
+	if ((value == 0)) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
+	_flags->SetZeroAtMask(FLAG_C);
 }
 
 //Compare A with n. Basically A - n, but don't store results
+// p87
 void CPU::CpaN(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0xBE) { //edge case [8 cycles]
@@ -689,10 +775,16 @@ void CPU::CpaN(uint8_t opcode) {
 	}
 
 	//Set flags
-	_flags->SetFlag(FLAG_C, (_reg->a < n));
-	_flags->SetFlag(FLAG_H, (_reg->a & 0xF) < (n & 0xF));
-	_flags->SetFlag(FLAG_N, true);
-	_flags->SetFlag(FLAG_Z, ((_reg->a - n) == 0));
+	if (n == 0 || _reg->a == n) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetOneAtMask(FLAG_N);
+	if ((_reg->a & 0xF) < (n & 0xF)) {
+		_flags->SetOneAtMask(FLAG_H);
+	}
+	if ((_reg->a < n)) { //TODO add condition 'set if no borrow' as well?
+		_flags->SetOneAtMask(FLAG_C);
+	}
 }
 
 //Increment register n
@@ -713,12 +805,17 @@ void CPU::IncN(uint8_t opcode) {
 		value = _reg->Read8(_reg, n);
 		_cycleCounter += 4;
 	}
-	_reg->Write8(_reg, n, (value+1));
+	value++; //Increment value
+	_reg->Write8(_reg, n, value);
 	//Set flags
+	if (value == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	if ((value & 0xF) > 0xF){
+		_flags->SetOneAtMask(FLAG_H);
+	}
 	//FLAG_C not affected
-	_flags->SetFlag(FLAG_H, ((value + 1) & 0xF) > 0xF);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, ((value + 1) == 0));
 }
 
 //Decrement register n
@@ -739,12 +836,17 @@ void CPU::DecN(uint8_t opcode) {
 		value = _reg->Read8(_reg, n);
 		_cycleCounter += 4;
 	}
-	_reg->Write8(_reg, n, (value - 1));
+	value--;
+	_reg->Write8(_reg, n, value);
 	//Set flags
+	if (value == 0) { 
+		_flags->SetOneAtMask(FLAG_Z); 
+	}
+	_flags->SetOneAtMask(FLAG_N);
+	if (((value & 0xF) == 0xF)) {
+		_flags->SetOneAtMask(FLAG_H); //Not sure if this is correct
+	}
 	//FLAG_C not affected
-	_flags->SetFlag(FLAG_H, (((value - 1) & 0xF) == 0xF)); //Not sure if this is correct
-	_flags->SetFlag(FLAG_N, true);
-	_flags->SetFlag(FLAG_Z, ((value - 1) == 0));
 }
 
 //Add n to HL [8 cycles]
@@ -752,22 +854,28 @@ void CPU::AddHlN16(uint8_t opcode) {
 	uint16_t hl_value = _reg->Read16(_reg, HL);
 	uint8_t n = opcode == 0x39 ? SP : (((opcode - 1) / 8) - 1); //SP is offset by A
 	uint16_t n_value = _reg->Read16(_reg, n);
-	_flags->SetFlag(FLAG_C, hl_value + n_value > 0xFF);
-	_flags->SetFlag(FLAG_H, (hl_value & 0xF) + (n_value & 0xF) > 0xF);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, ((hl_value + n_value) == 0)); //'Not affected' in docs?
+	//Set flags
+	//FLAG_Z not affected
+	_flags->SetZeroAtMask(FLAG_N);
+	if ((hl_value & 0xF) + (n_value & 0xF) > 0xF) {
+		_flags->SetOneAtMask(FLAG_H);
+	}
+	if ((hl_value + n_value) > 0xFF) {
+		_flags->SetOneAtMask(FLAG_C);
+	}
 	_cycleCounter += 8;
 }
 
 //Add n to Stack Pointer (only the first signed byte) [16 cycles]
+// p91
 void CPU::AddSpN16(uint8_t opcode) {
 	int8_t n = (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));;
 	uint16_t sp_value = _reg->Read16(_reg, SP);
 	_reg->Write16(_reg, SP, sp_value + n);
-	_flags->SetFlag(FLAG_C, (sp_value + n) > 0xFF);
-	_flags->SetFlag(FLAG_H, (sp_value & 0xF) + (n & 0xF) > 0xF);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, false);
+	_flags->SetZeroAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	((sp_value & 0xF) + (n & 0xF) > 0xF) ? _flags->SetOneAtMask(FLAG_H) : _flags->SetZeroAtMask(FLAG_H); //TODO check condition
+	((sp_value + n) > 0xFF) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //TODO check condition
 	_cycleCounter += 16;
 	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
 }
@@ -987,10 +1095,13 @@ void CPU::SwapN(uint8_t cb_opcode) {
 		_reg->Write8(_reg, cb_opcode - 30, result);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_C, false);
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
+	_flags->SetZeroAtMask(FLAG_C);
 }
 
 // Decimal adjust register A
@@ -1020,33 +1131,44 @@ void CPU::Daa() {
 	}
 	_reg->Write8(_reg, A, a_value);
 
-	_flags->SetFlag(FLAG_C, a_value > 0xFF);
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, a_value == 0);
+	//Set flags
+	if (a_value == 0) {
+		_flags->SetZeroAtMask(FLAG_Z);
+	}
+	//FLAG_N Not affected
+	_flags->SetZeroAtMask(FLAG_H);
+	(a_value > 0xFF) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C);
 	_cycleCounter += 4;
 }
 
 //Complement A register. (Flip all bits.) [4 cycles]
 void CPU::Cpl() {
 	_reg->Write8(_reg, A, ~(_reg->a));
-	_flags->SetFlag(FLAG_H, true);
-	_flags->SetFlag(FLAG_N, true);
+	//Set flags
+	//FLAG_Z Not affected
+	_flags->SetOneAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	//FLAG_C Not affected
 	_cycleCounter += 4;
 }
 
 //Complement FLAG_C [4 cycles]
 void CPU::Ccf() {
-	_flags->BitFlip(FLAG_C);
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
+	//Set flags
+	//FLAG_Z Not affected
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
+	_flags->SetBitFlipAtMask(FLAG_C);
 	_cycleCounter += 4;
 }
 
 //Set Carry flag. [4 cycles]
 void CPU::Scf() {
-	_flags->SetFlag(FLAG_C, true);
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
+	//Set flags
+	//FLAG_Z Not affected
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
+	_flags->SetOneAtMask(FLAG_C);
 	_cycleCounter += 4;
 }
 
@@ -1098,15 +1220,19 @@ void CPU::Ei() {
 
 //Rotate A left, old bit 7 in carry flag [4 cycles]
 void CPU::Rlca() {
-	_flags->SetFlag(FLAG_C, (_reg->a & 7)); //Don't use old carry flag
+	//Set FLAG_C before info is removed
+	(_reg->a & 7) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
 	uint8_t carry = _flags->GetFlag(FLAG_C);
 	uint8_t result = (_reg->a << 1) | (carry & 7);
 
 	_reg->Write8(_reg, A, result);
 
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 	_cycleCounter += 4;
 }
 
@@ -1114,41 +1240,52 @@ void CPU::Rlca() {
 void CPU::Rla() {
 	uint8_t carry = _flags->GetFlag(FLAG_C);  //Do use old carry flag
 	uint8_t result = (_reg->a << 1) | carry;
-	_flags->SetFlag(FLAG_C, (_reg->a & 7));
+	//Set FLAG_C before info is overridden
+	(_reg->a & 7) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C);
 
 	_reg->Write8(_reg, A, result);
-
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, false); //against the grain
+	
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z); //TODO check if this should be reset instead of condition
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 	_cycleCounter += 4;
 }
 
 //Rotate A right, old bit 0 in carry flag [4 cycles]
+// p100
 void CPU::Rrca() {
-	_flags->SetFlag(FLAG_C, (_reg->a & 0)); //Don't use old carry flag
+	(_reg->a & 0) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
 	uint8_t carry = _flags->GetFlag(FLAG_C);
 	uint8_t result = (_reg->a >> 1) | (carry << 7);
 
 	_reg->Write8(_reg, A, result);
 
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 	_cycleCounter += 4;
 }
 
 //Rotate A right through carry flag [4 cycles]
 void CPU::Rra() {
 	uint8_t carry = _flags->GetFlag(FLAG_C);
-	_flags->SetFlag(FLAG_C, (_reg->a & 0)); //Don't use old carry flag
+	(_reg->a & 0) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
 	uint8_t result = (_reg->a >> 1) | (carry << 7);
 
 	_reg->Write8(_reg, A, result);
 
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 	_cycleCounter += 4;
 }
 
@@ -1164,7 +1301,7 @@ void CPU::RlcN(uint8_t cb_opcode) {
 	else {
 		n_value = _reg->Read8(_reg, cb_opcode);
 	}
-	_flags->SetFlag(FLAG_C, (n_value & 7)); //Don't use old carry flag
+	(n_value & 7) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
 	uint8_t carry = _flags->GetFlag(FLAG_C);
 	uint8_t result = (n_value << 1) | (carry & 7);
 	if (cb_opcode == 0x06) { // [16 cycles]
@@ -1180,9 +1317,12 @@ void CPU::RlcN(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 }
 
 //Rotate n left through Carry flag.
@@ -1198,7 +1338,7 @@ void CPU::RlN(uint8_t cb_opcode) {
 		n_value = _reg->Read8(_reg, cb_opcode - 10);
 	}
 	uint8_t carry = _flags->GetFlag(FLAG_C);
-	_flags->SetFlag(FLAG_C, (n_value & 7)); //Don't use old carry flag
+	(n_value & 7) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
 	uint8_t result = (n_value << 1) | carry;
 	if (cb_opcode == 0x16) { // [16 cycles]
 		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), result);
@@ -1213,9 +1353,12 @@ void CPU::RlN(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 }
 
 //Rotate n right. Old bit 7 to Carry flag.
@@ -1230,7 +1373,7 @@ void CPU::RrcN(uint8_t cb_opcode) {
 	else {
 		n_value = _reg->Read8(_reg, cb_opcode - 8);
 	}
-	_flags->SetFlag(FLAG_C, (n_value & 0)); //Don't use old carry flag
+	(n_value & 0) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
 	uint8_t carry = _flags->GetFlag(FLAG_C);
 	uint8_t result = (n_value >> 1) | (carry << 7);
 	if (cb_opcode == 0x0E) { // [16 cycles]
@@ -1246,9 +1389,12 @@ void CPU::RrcN(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 }
 
 //Rotate n right. Old bit 7 to Carry flag.
@@ -1264,7 +1410,7 @@ void CPU::RrN(uint8_t cb_opcode) {
 		n_value = _reg->Read8(_reg, cb_opcode - 18);
 	}
 	uint8_t carry = _flags->GetFlag(FLAG_C);
-	_flags->SetFlag(FLAG_C, (n_value & 0)); //Don't use old carry flag
+	(n_value & 0) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
 	uint8_t result = (n_value >> 1) | (carry << 7);
 	if (cb_opcode == 0x1E) { // [16 cycles]
 		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), result);
@@ -1279,9 +1425,12 @@ void CPU::RrN(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 }
 
 //Shift n left into Carry. LSB of n set to 0.
@@ -1297,7 +1446,7 @@ void CPU::SlaN(uint8_t cb_opcode) {
 		n_value = _reg->Read8(_reg, cb_opcode - 20);
 	}
 
-	_flags->SetFlag(FLAG_C, (n_value & 7));
+	(n_value & 7) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C);
 	uint8_t result = (n_value << 1);
 	if (cb_opcode == 0x26) { //(hl) [16 cycles]
 		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), result);
@@ -1312,9 +1461,12 @@ void CPU::SlaN(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 }
 
 //Shift n right into Carry. MSB doesn't change.
@@ -1330,7 +1482,7 @@ void CPU::SraN(uint8_t cb_opcode) {
 		n_value = _reg->Read8(_reg, cb_opcode - 28);
 	}
 
-	_flags->SetFlag(FLAG_C, (n_value & 7));
+	(n_value & 0) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C);
 	uint8_t result = (n_value & 7) | (n_value >> 1); //Risky if this is correct
 	if (cb_opcode == 0x2E) { //(hl) [16 cycles]
 		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), result);
@@ -1345,9 +1497,12 @@ void CPU::SraN(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 }
 
 //Shift n right into Carry. MSB set to 0
@@ -1363,7 +1518,7 @@ void CPU::SrlN(uint8_t cb_opcode) {
 		n_value = _reg->Read8(_reg, cb_opcode - 38);
 	}
 
-	_flags->SetFlag(FLAG_C, (n_value & 7));
+	(n_value & 0) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C);
 	uint8_t result = n_value >> 1;
 	if (cb_opcode == 0x3E) { //(hl) [16 cycles]
 		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), result);
@@ -1377,9 +1532,13 @@ void CPU::SrlN(uint8_t cb_opcode) {
 		_reg->Write8(_reg, cb_opcode - 38, result);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_H, false);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, result == 0);
+
+	//Set remaining flags
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetZeroAtMask(FLAG_H);
 }
 
 //Test bit at position 0
@@ -1397,9 +1556,12 @@ void CPU::Bit0(uint8_t cb_opcode) {
 		test = _reg->Read8(_reg, cb_opcode - 64);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_H, true);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (test & 1) ? 0 : 1);
+
+	//Set flags
+	(test & 1) ?  _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	//Flag_C not affected
 }
 
 //Test bit at position 1
@@ -1417,9 +1579,11 @@ void CPU::Bit1(uint8_t cb_opcode) {
 		test = _reg->Read8(_reg, cb_opcode - 72);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_H, true);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (test & 2) ? 0 : 1);
+	//Set flags
+	(test & 2) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	//Flag_C not affected
 }
 
 //Test bit at position 2
@@ -1437,9 +1601,11 @@ void CPU::Bit2(uint8_t cb_opcode) {
 		test = _reg->Read8(_reg, cb_opcode - 80);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_H, true);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (test & 3) ? 0 : 1);
+	//Set flags
+	(test & 3) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	//Flag_C not affected
 }
 
 //Test bit at position 3
@@ -1457,9 +1623,11 @@ void CPU::Bit3(uint8_t cb_opcode) {
 		test = _reg->Read8(_reg, cb_opcode - 88);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_H, true);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (test & 4) ? 0 : 1);
+	//Set flags
+	(test & 4) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	//Flag_C not affected
 }
 
 //Test bit at position 4
@@ -1477,9 +1645,12 @@ void CPU::Bit4(uint8_t cb_opcode) {
 		test = _reg->Read8(_reg, cb_opcode - 96);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_H, true);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (test & 5) ? 0 : 1);
+
+	//Set flags
+	(test & 5) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	//Flag_C not affected
 }
 
 //Test bit at position 5
@@ -1497,9 +1668,12 @@ void CPU::Bit5(uint8_t cb_opcode) {
 		test = _reg->Read8(_reg, cb_opcode - 104);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_H, true);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (test & 6) ? 0 : 1);
+
+	//Set flags
+	(test & 6) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	//Flag_C not affected
 }
 
 //Test bit at position 6
@@ -1517,9 +1691,12 @@ void CPU::Bit6(uint8_t cb_opcode) {
 		test = _reg->Read8(_reg, cb_opcode - 112);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_H, true);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (test & 7) ? 0 : 1);
+
+	//Set flags
+	(test & 7) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	//Flag_C not affected
 }
 
 //Test bit at position 7
@@ -1537,9 +1714,197 @@ void CPU::Bit7(uint8_t cb_opcode) {
 		test = _reg->Read8(_reg, cb_opcode - 124);
 		_cycleCounter += 8;
 	}
-	_flags->SetFlag(FLAG_H, true);
-	_flags->SetFlag(FLAG_N, false);
-	_flags->SetFlag(FLAG_Z, (test & 8) ? 0 : 1);
+
+	//Set flags
+	(test & 8) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_N);
+	_flags->SetOneAtMask(FLAG_H);
+	//Flag_C not affected
+}
+
+
+//Set bit at position 0
+void CPU::Set0(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xC6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 0)) | (1 << 0);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+		_cycleCounter += 16;
+	}
+	else if (cb_opcode == 0xC7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 0)) | (1 << 0);
+		_reg->Write8(_reg, A, n_value);
+		_cycleCounter += 8;
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 192));
+		n_value = (n_value & ~(1 << 0)) | (1 << 0);
+		_reg->Write8(_reg, (cb_opcode - 192), n_value);
+		_cycleCounter += 8;
+	}
+}
+
+//Set bit at position 1
+void CPU::Set1(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xCE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 1)) | (1 << 1);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+		_cycleCounter += 16;
+	}
+	else if (cb_opcode == 0xCF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 1)) | (1 << 1);
+		_reg->Write8(_reg, A, n_value);
+		_cycleCounter += 8;
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 200));
+		n_value = (n_value & ~(1 << 1)) | (1 << 1);
+		_reg->Write8(_reg, (cb_opcode - 200), n_value);
+		_cycleCounter += 8;
+	}
+}
+
+//Set bit at position 2
+void CPU::Set2(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xD6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 2)) | (1 << 2);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+		_cycleCounter += 16;
+	}
+	else if (cb_opcode == 0xD7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 2)) | (1 << 2);
+		_reg->Write8(_reg, A, n_value);
+		_cycleCounter += 8;
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 208));
+		n_value = (n_value & ~(1 << 2)) | (1 << 2);
+		_reg->Write8(_reg, (cb_opcode - 208), n_value);
+		_cycleCounter += 8;
+	}
+}
+
+//Set bit at position 3
+void CPU::Set3(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xDE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 3)) | (1 << 3);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+		_cycleCounter += 16;
+	}
+	else if (cb_opcode == 0xDF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 3)) | (1 << 3);
+		_reg->Write8(_reg, A, n_value);
+		_cycleCounter += 8;
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 210));
+		n_value = (n_value & ~(1 << 3)) | (1 << 3);
+		_reg->Write8(_reg, (cb_opcode - 210), n_value);
+		_cycleCounter += 8;
+	}
+}
+
+//Set bit at position 4
+void CPU::Set4(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xE6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 4)) | (1 << 4);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+		_cycleCounter += 16;
+	}
+	else if (cb_opcode == 0xE8) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 4)) | (1 << 4);
+		_reg->Write8(_reg, A, n_value);
+		_cycleCounter += 8;
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 218));
+		n_value = (n_value & ~(1 << 4)) | (1 << 4);
+		_reg->Write8(_reg, (cb_opcode - 218), n_value);
+		_cycleCounter += 8;
+	}
+}
+
+//Set bit at position 5
+void CPU::Set5(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xEE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 5)) | (1 << 5);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+		_cycleCounter += 16;
+	}
+	else if (cb_opcode == 0xEF) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 5)) | (1 << 5);
+		_reg->Write8(_reg, A, n_value);
+		_cycleCounter += 8;
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 220));
+		n_value = (n_value & ~(1 << 5)) | (1 << 5);
+		_reg->Write8(_reg, (cb_opcode - 220), n_value);
+		_cycleCounter += 8;
+	}
+}
+
+//Set bit at position 6
+void CPU::Set6(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xF6) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 6)) | (1 << 6);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+		_cycleCounter += 16;
+	}
+	else if (cb_opcode == 0xF7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 6)) | (1 << 6);
+		_reg->Write8(_reg, A, n_value);
+		_cycleCounter += 8;
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 228));
+		n_value = (n_value & ~(1 << 6)) | (1 << 6);
+		_reg->Write8(_reg, (cb_opcode - 228), n_value);
+		_cycleCounter += 8;
+	}
+}
+
+//Set bit at position 7
+void CPU::Set7(uint8_t cb_opcode) {
+	uint8_t n_value;
+	if (cb_opcode == 0xFE) { //HL [ 16 cycles]
+		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
+		n_value = (n_value & ~(1 << 7)) | (1 << 7);
+		_mmu->WriteMemory8(_mmu, HL, n_value);
+		_cycleCounter += 16;
+	}
+	else if (cb_opcode == 0xF7) { //A [8 cycles] 
+		n_value = _reg->Read8(_reg, A);
+		n_value = (n_value & ~(1 << 7)) | (1 << 7);
+		_reg->Write8(_reg, A, n_value);
+		_cycleCounter += 8;
+	}
+	else {// [8 cycles]
+		n_value = _reg->Read8(_reg, (cb_opcode - 230));
+		n_value = (n_value & ~(1 << 7)) | (1 << 7);
+		_reg->Write8(_reg, (cb_opcode - 230), n_value);
+		_cycleCounter += 8;
+	}
 }
 
 //Reset bit at position 0
@@ -1726,190 +2091,6 @@ void CPU::Res7(uint8_t cb_opcode) {
 	}
 }
 
-//Set bit at position 0
-void CPU::Set0(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xC6) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 0)) | (1 << 0);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-		_cycleCounter += 16;
-	}
-	else if (cb_opcode == 0xC7) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 0)) | (1 << 0);
-		_reg->Write8(_reg, A, n_value);
-		_cycleCounter += 8;
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 192));
-		n_value = (n_value & ~(1 << 0)) | (1 << 0);
-		_reg->Write8(_reg, (cb_opcode - 192), n_value);
-		_cycleCounter += 8;
-	}
-}
-
-//Set bit at position 1
-void CPU::Set1(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xCE) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 1)) | (1 << 1);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-		_cycleCounter += 16;
-	}
-	else if (cb_opcode == 0xCF) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 1)) | (1 << 1);
-		_reg->Write8(_reg, A, n_value);
-		_cycleCounter += 8;
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 200));
-		n_value = (n_value & ~(1 << 1)) | (1 << 1);
-		_reg->Write8(_reg, (cb_opcode - 200), n_value);
-		_cycleCounter += 8;
-	}
-}
-
-//Set bit at position 2
-void CPU::Set2(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xD6) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 2)) | (1 << 2);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-		_cycleCounter += 16;
-	}
-	else if (cb_opcode == 0xD7) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 2)) | (1 << 2);
-		_reg->Write8(_reg, A, n_value);
-		_cycleCounter += 8;
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 208));
-		n_value = (n_value & ~(1 << 2)) | (1 << 2);
-		_reg->Write8(_reg, (cb_opcode - 208), n_value);
-		_cycleCounter += 8;
-	}
-}
-
-//Set bit at position 3
-void CPU::Set3(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xDE) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 3)) | (1 << 3);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-		_cycleCounter += 16;
-	}
-	else if (cb_opcode == 0xDF) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 3)) | (1 << 3);
-		_reg->Write8(_reg, A, n_value);
-		_cycleCounter += 8;
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 210));
-		n_value = (n_value & ~(1 << 3)) | (1 << 3);
-		_reg->Write8(_reg, (cb_opcode - 210), n_value);
-		_cycleCounter += 8;
-	}
-}
-
-//Set bit at position 4
-void CPU::Set4(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xE6) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 4)) | (1 << 4);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-		_cycleCounter += 16;
-	}
-	else if (cb_opcode == 0xE8) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 4)) | (1 << 4);
-		_reg->Write8(_reg, A, n_value);
-		_cycleCounter += 8;
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 218));
-		n_value = (n_value & ~(1 << 4)) | (1 << 4);
-		_reg->Write8(_reg, (cb_opcode - 218), n_value);
-		_cycleCounter += 8;
-	}
-}
-
-//Set bit at position 5
-void CPU::Set5(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xEE) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 5)) | (1 << 5);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-		_cycleCounter += 16;
-	}
-	else if (cb_opcode == 0xEF) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 5)) | (1 << 5);
-		_reg->Write8(_reg, A, n_value);
-		_cycleCounter += 8;
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 220));
-		n_value = (n_value & ~(1 << 5)) | (1 << 5);
-		_reg->Write8(_reg, (cb_opcode - 220), n_value);
-		_cycleCounter += 8;
-	}
-}
-
-//Set bit at position 6
-void CPU::Set6(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xF6) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 << 6)) | (1 << 6);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-		_cycleCounter += 16;
-	}
-	else if (cb_opcode == 0xF7) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 6)) | (1 << 6);
-		_reg->Write8(_reg, A, n_value);
-		_cycleCounter += 8;
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 228));
-		n_value = (n_value & ~(1 << 6)) | (1 << 6);
-		_reg->Write8(_reg, (cb_opcode - 228), n_value);
-		_cycleCounter += 8;
-	}
-}
-
-//Set bit at position 7
-void CPU::Set7(uint8_t cb_opcode) {
-	uint8_t n_value;
-	if (cb_opcode == 0xFE) { //HL [ 16 cycles]
-		n_value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
-		n_value = (n_value & ~(1 <<  7)) | (1 << 7);
-		_mmu->WriteMemory8(_mmu, HL, n_value);
-		_cycleCounter += 16;
-	}
-	else if (cb_opcode == 0xF7) { //A [8 cycles] 
-		n_value = _reg->Read8(_reg, A);
-		n_value = (n_value & ~(1 << 7)) | (1 << 7);
-		_reg->Write8(_reg, A, n_value);
-		_cycleCounter += 8;
-	}
-	else {// [8 cycles]
-		n_value = _reg->Read8(_reg, (cb_opcode - 230));
-		n_value = (n_value & ~(1 << 7)) | (1 << 7);
-		_reg->Write8(_reg, (cb_opcode - 230), n_value);
-		_cycleCounter += 8;
-	}
-}
-
 //Jump to address nn [12 cycles]
 void CPU::JpNn() {
 	uint8_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
@@ -1958,36 +2139,39 @@ void CPU::JrN() {
 }
 
 //if following condition is true then add n to current  address and jump to it
+// P
 void CPU::JrCcN(uint8_t opcode) {
+	_cycleCounter += 4;
 	switch (opcode) {
 	case 0x20:
 		std::cout << " NZ " << (bool)_flags->GetFlag(FLAG_Z);
 		if (_flags->GetFlag(FLAG_Z) == 0) {
-			JrN();
+			return JrN();
 		}
 		break;
 	case 0x28:
 		std::cout << " Z " << (bool)_flags->GetFlag(FLAG_Z);
 		if (_flags->GetFlag(FLAG_Z) == 1) {
-			JrN();
+			return JrN();
 		}
 		break;
 	case 0x30:
 		std::cout << " NC " << (bool)_flags->GetFlag(FLAG_C);
 		if (_flags->GetFlag(FLAG_C) == 0) {
-			JrN();
+			return JrN();
 		}
 		break;
 	case 0x38:
 		std::cout << " C " << (bool)_flags->GetFlag(FLAG_C);
 		if (_flags->GetFlag(FLAG_C) == 1) {
-			JrN();
+			return JrN();
 		}
 		break;
 	}
+	_reg->array[PC] += 1;
 }
 
-//Push address of next instruction onto stack and then  jump to address nn. [12 cycles]
+//Push address of next instruction onto stack and then jump to address nn. [12 cycles]
 void CPU::CallNn() {
 	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
 	//_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2);
@@ -1996,7 +2180,7 @@ void CPU::CallNn() {
 	
 	_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2);
 	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, SP), _reg->Read16(_reg, PC));
-	_reg->array[PC]+=2;
+	_reg->array[PC]+=1; //TODO check: was +2
 	_cycleCounter += 12;
 }
 

@@ -1,9 +1,10 @@
 *.bin
 *.bios
-*.rom
+*rom*
 *.gb
 *.pdf
 /Debug/*
 /.vs/*
 x64/
 packages/
+bootSequence.md

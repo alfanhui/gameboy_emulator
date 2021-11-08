@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <bitset>
+#include <optional>
 
 constexpr auto FLAG_0 = 0;
 constexpr auto FLAG_1 = 1;
@@ -20,10 +21,12 @@ class CPUFlags {
 	std::bitset<8> _mask5{ 0b0010'0000 }; 
 	std::bitset<8> _mask6{ 0b0100'0000 }; 
 	std::bitset<8> _mask7{ 0b1000'0000 }; 
-	std::bitset<8> GetMasker(int mask);
+	std::bitset<8> GetMask(int mask);
 public:
 	std::bitset<8> flags{ 0b000'0000 }; //8 bit comparer
 	int GetFlag(int mask);
-	void SetFlag(int mask, bool isOn);
-	void BitFlip(int mask);
+	void SetFlag(int mask, bool value);
+	void SetZeroAtMask(int mask);
+	void SetOneAtMask(int mask);
+	void SetBitFlipAtMask(int mask);
 };

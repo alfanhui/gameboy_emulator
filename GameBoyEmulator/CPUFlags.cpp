@@ -1,7 +1,8 @@
 #include "CPUFlags.h"
 #include <iostream>
+#include <optional>
 
-std::bitset<8> CPUFlags::GetMasker(int mask) {
+std::bitset<8> CPUFlags::GetMask(int mask) {
 	switch (mask) {
 	case 0:
 		return _mask0;
@@ -26,21 +27,35 @@ std::bitset<8> CPUFlags::GetMasker(int mask) {
 }
 
 int CPUFlags::GetFlag(int mask){
+	GetMask(mask); //Test if value is in mask
 	return flags.test(mask);
 }
 
-//Theres probably a more neater way of doing this, but does it really matter?
-void CPUFlags::SetFlag(int mask, bool isOn) {
-	std::bitset<8> masker = GetMasker(mask);
-	if (isOn) {
-		flags |= masker;
+//Deprecated
+void CPUFlags::SetFlag(int mask, bool value) {
+	std::bitset<8> masker = GetMask(mask);
+	if (value) {
+		flags |= masker; //OR
 	}
 	else {
-		flags &= ~masker;
+		flags &= ~masker; //AND
 	}
 }
 
-void CPUFlags::BitFlip(int mask) {
-	std::bitset<8> masker = GetMasker(mask);
+// Logic gate AND - only true if both are true (mask is always 1, so it resets bit to zero)
+void CPUFlags::SetZeroAtMask(int mask) {
+	std::bitset<8> masker = GetMask(mask);
+	flags &= ~masker;
+}
+
+// Logic gate OR - only TRUE if either are true (turns on, mask is always 1)
+void CPUFlags::SetOneAtMask(int mask) {
+	std::bitset<8> masker = GetMask(mask);
+	flags |= masker;
+}
+
+// Logic gate XOR - only TRUE if they are opposing values (bit switches)
+void CPUFlags::SetBitFlipAtMask(int mask) {
+	std::bitset<8> masker = GetMask(mask);
 	flags ^= masker;
 }

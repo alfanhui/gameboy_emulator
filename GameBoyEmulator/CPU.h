@@ -17,7 +17,12 @@ private:
 public:
 	CPU(MMU* mmu, CPURegister* reg, CPUFlags* flags) : _mmu(mmu), _reg(reg), _flags(flags) {}
 	void RunInstruction(uint8_t opcode);
-	void LdNnN(uint8_t opcode);
+	void LdBnn();
+	void LdCnn();
+	void LdDnn();
+	void LdEnn();
+	void LdHnn();
+	void LdLnn();
 	void LdR1R2(uint8_t opcode);
 	void LdAN(uint8_t opcode);
 	void LdNA(uint8_t opcode);
@@ -36,7 +41,7 @@ public:
 	void PushNn(uint8_t opcode);
 	void PopNn(uint8_t opcode);
 	void AddAN(uint8_t opcode);
-	void AbcAN(uint8_t opcode);
+	void AdcAN(uint8_t opcode);
 	void SubAN(uint8_t opcode);
 	void SbcAN(uint8_t opcode);
 	void AndAN(uint8_t opcode);
