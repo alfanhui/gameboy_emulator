@@ -16,13 +16,10 @@ private:
 	uint32_t _cycleCounter = 0;
 public:
 	CPU(MMU* mmu, CPURegister* reg, CPUFlags* flags) : _mmu(mmu), _reg(reg), _flags(flags) {}
+	uint32_t GetCycleCounter();
+	void SetCycleCounter(uint32_t cycleCounter);
 	void RunInstruction(uint8_t opcode);
-	void LdBnn();
-	void LdCnn();
-	void LdDnn();
-	void LdEnn();
-	void LdHnn();
-	void LdLnn();
+	void LdNnn(uint8_t opcode);
 	void LdR1R2(uint8_t opcode);
 	void LdAN(uint8_t opcode);
 	void LdNA(uint8_t opcode);

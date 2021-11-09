@@ -1,32 +1,40 @@
 #include <iostream>
 #include "CPU.h"
 
+uint32_t CPU::GetCycleCounter() {
+	return _cycleCounter;
+}
+
+void CPU::SetCycleCounter(uint32_t cycleCounter) {
+	_cycleCounter = cycleCounter;
+}
+
 void CPU::RunInstruction(uint8_t opcode)
 {
 	switch (opcode) {
 		case 0x06: 
 			std::cout << "LD B, nn";
-			LdBnn();
+			LdNnn(opcode);
 		break; 
 		case 0x0E: 
 			std::cout << "LD C, nn";
-			LdCnn();
+			LdNnn(opcode);
 		break; 
 		case 0x16: 
 			std::cout << "LD D, nn";
-			LdDnn();
+			LdNnn(opcode);
 		break; 
 		case 0x1E:	
 			std::cout << "LD E, nn";
-			LdEnn();
+			LdNnn(opcode);
 		break; 
 		case 0x26: 
 			std::cout << "LD H, nn";
-			LdHnn();
+			LdNnn(opcode);
 		break; 
 		case 0x2E:
 			std::cout << "LD L, nn";
-			LdLnn(); 
+			LdNnn(opcode);
 			break;
 		case 0x36: case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: 
 		case 0x45: case 0x46: case 0x48: case 0x49: case 0x4A: case 0x4B:
@@ -271,49 +279,11 @@ void CPU::RunInstruction(uint8_t opcode)
 }
 
 //Desc: Put value nn into n.
-void CPU::LdBnn() {
+// p65
+void CPU::LdNnn(uint8_t opcode) {
 	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write8(_reg, addr, _reg->b);
-	_cycleCounter += 8;
-	_reg->array[PC]++;
-}
-
-//Desc: Put value nn into n.
-void CPU::LdCnn() {
-	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write8(_reg, addr, _reg->c);
-	_cycleCounter += 8;
-	_reg->array[PC]++;
-}
-
-//Desc: Put value nn into n.
-void CPU::LdDnn() {
-	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write8(_reg, addr, _reg->d);
-	_cycleCounter += 8;
-	_reg->array[PC]++;
-}
-
-//Desc: Put value nn into n.
-void CPU::LdEnn() {
-	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write8(_reg, addr, _reg->e);
-	_cycleCounter += 8;
-	_reg->array[PC]++;
-}
-
-//Desc: Put value nn into n.
-void CPU::LdHnn() {
-	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write8(_reg, addr, _reg->h);
-	_cycleCounter += 8;
-	_reg->array[PC]++;
-}
-
-//Desc: Put value nn into n.
-void CPU::LdLnn() {
-	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write8(_reg, addr, _reg->l);
+	uint8_t value = _reg->Read8(_reg, ((opcode + 2) / 8) - 1);
+	_mmu->WriteMemory8(_mmu, addr, value);
 	_cycleCounter += 8;
 	_reg->array[PC]++;
 }
@@ -2093,7 +2063,7 @@ void CPU::Res7(uint8_t cb_opcode) {
 
 //Jump to address nn [12 cycles]
 void CPU::JpNn() {
-	uint8_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
+	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
 	_reg->Write16(_reg, PC, addr);
 	_cycleCounter += 12;
 }

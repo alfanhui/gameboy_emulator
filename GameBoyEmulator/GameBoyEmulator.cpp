@@ -25,7 +25,7 @@ int main()
     do {
         uint8_t opcode = mmu->ReadMemory8(mmu, reg->Read8(reg, PC));
         std::cout << "Execute " << (int)reg->Read16(reg, PC) << ": " << std::hex << (int)opcode << " ";
-        reg->array[PC]++;
+        reg->array[PC]++; //Next opcode
         cpu->RunInstruction(opcode);
         std::cout << std::endl;
         Sleep(150);

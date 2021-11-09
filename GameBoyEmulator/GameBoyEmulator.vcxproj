@@ -155,7 +155,6 @@
     <ClCompile Include="FileLoader.cpp" />
     <ClCompile Include="GameBoyEmulator.cpp" />
     <ClCompile Include="MMU.cpp" />
-    <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CPU.h" />
@@ -163,7 +162,6 @@
     <ClInclude Include="CPURegister.h" />
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="MMU.h" />
-    <ClInclude Include="Test.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\dmg_boot.bin" />
