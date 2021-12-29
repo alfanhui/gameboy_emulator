@@ -12,29 +12,8 @@ void CPU::SetCycleCounter(uint32_t cycleCounter) {
 void CPU::RunInstruction(uint8_t opcode)
 {
 	switch (opcode) {
-		case 0x06: 
-			std::cout << "LD B, nn";
-			LdNnn(opcode);
-		break; 
-		case 0x0E: 
-			std::cout << "LD C, nn";
-			LdNnn(opcode);
-		break; 
-		case 0x16: 
-			std::cout << "LD D, nn";
-			LdNnn(opcode);
-		break; 
-		case 0x1E:	
-			std::cout << "LD E, nn";
-			LdNnn(opcode);
-		break; 
-		case 0x26: 
-			std::cout << "LD H, nn";
-			LdNnn(opcode);
-		break; 
-		case 0x2E:
-			std::cout << "LD L, nn";
-			LdNnn(opcode);
+		case 0x06: case 0x0E: case 0x16: case 0x1E:	case 0x26: case 0x2E:
+			LdNnn(opcode); 
 			break;
 		case 0x36: case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: 
 		case 0x45: case 0x46: case 0x48: case 0x49: case 0x4A: case 0x4B:
@@ -45,11 +24,9 @@ void CPU::RunInstruction(uint8_t opcode)
 		case 0x6A: case 0x6B: case 0x6C: case 0x6E: case 0x70: case 0x71: 
 		case 0x72: case 0x73: case 0x74: case 0x75: case 0x7F: case 0x78: 
 		case 0x79: case 0x7A: case 0x7B: case 0x7C: case 0x7D: case 0x7E:
-			std::cout << "LD r1, r2";
 			LdR1R2(opcode);
 			break;
 		case 0x0A: case 0x1A: case 0xFA: case 0x3E:
-			std::cout << "LD A, n";
 			LdAN(opcode);
 			break;
 		case 0x47: case 0x4F: case 0x57: case 0x5F: case 0x67: case 0x6F:
@@ -281,20 +258,24 @@ void CPU::RunInstruction(uint8_t opcode)
 //Desc: Put value nn into n.
 // p65
 void CPU::LdNnn(uint8_t opcode) {
+	std::cout << "LD " << _reg->labels[((opcode + 2) / 8) - 1] << ", nn";
+
 	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 	uint8_t value = _reg->Read8(_reg, ((opcode + 2) / 8) - 1);
 	_mmu->WriteMemory8(_mmu, addr, value);
 	_cycleCounter += 8;
-	_reg->array[PC]++;
+	_reg->array[PC]++; //Must increase as we took a value off the next instruction
 }
 
 //Put value r2 into r1.
 void CPU::LdR1R2(uint8_t opcode) {
 	if (opcode == 0x36) { //edge case [12 cycles]
+		std::cout << "LD (HL), n";
 		uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), value);
 		_cycleCounter += 12;
-		_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
+		_reg->array[PC]++;
+		//_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
 		return;
 	}
 	float r = (opcode / 8.0f) - 8.0f;
@@ -314,6 +295,7 @@ void CPU::LdR1R2(uint8_t opcode) {
 	else if (r2_orig == 7) {
 		r2 = A;
 	}
+	std::cout << "LD " << _reg->labels[r1] << ", " << _reg->labels[r2];
 	//8 cycles
 	if(r1_orig == 6)
 	{   //r1 is HL
@@ -335,28 +317,31 @@ void CPU::LdR1R2(uint8_t opcode) {
 
 //Put value n into A.
 void CPU::LdAN(uint8_t opcode) {
-	uint8_t n_value = BC;
-	uint16_t addr;
 	switch (opcode) {
-	case 0x1A:
-		n_value = DE; // 4 cycles
-		break;
-	case 0xFA:
-		addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC)); // 16 cycles
-		_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, addr)); 
-		_cycleCounter += 16;
-		_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
-		return;
-	case 0x3E:
-		_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC))); // 8 cycles
-		_cycleCounter += 8;
-		_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 1);
-		return;
-	default:
-		break;
+		case 0x0A:
+			std::cout << "LD A, (BC)";
+			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, BC))); // 4 cycles
+			_cycleCounter += 4;
+			break;
+		case 0x1A:
+			std::cout << "LD A, (DE)";
+			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, DE))); // 4 cycles
+			_cycleCounter += 4;
+			break;
+		case 0xFA:
+			std::cout << "LD A, nn";
+			uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC)); // 16 cycles
+			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, addr)); 
+			_cycleCounter += 16;
+			_reg->array[PC] = _reg->array[PC] + 2;
+			break;
+		case 0x3E:
+			std::cout << "LD A, (PC)";
+			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC))); // 8 cycles
+			_cycleCounter += 8;
+			_reg->array[PC]++;
+			break;
 	}
-	_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, n_value)));
-	_cycleCounter += 4;
 }
 
 //Put value A into n
