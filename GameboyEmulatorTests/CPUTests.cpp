@@ -14,7 +14,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace CPUTests
 {
-	TEST_CLASS(CPUTests)
+	TEST_CLASS(LdNnn)
 	{
 	public:
 		MMU* mmu;
@@ -30,7 +30,6 @@ namespace CPUTests
 			//Set PC to zero
 			reg->Write16(reg, PC, 0x0000);
 			cpu->SetCycleCounter(0);
-			std::cout << "PC" << (int)reg->Read16(reg, PC);
 		}
 
 		void LdNnnTest(uint8_t opcode, uint8_t random_number1, uint8_t random_number2)
@@ -75,6 +74,495 @@ namespace CPUTests
 		TEST_METHOD(LdNnnForLWorks) {
 			Assert::AreEqual(L, ((0x2E + 2) / 8) - 1);
 			LdNnnTest(0x2E, 0x50, 0x55);
+		}
+	};
+
+	TEST_CLASS(LdR1R2)
+	{
+	public:
+		MMU* mmu;
+		CPURegister* reg;
+		CPUFlags* flags;
+		CPU* cpu;
+
+		TEST_METHOD_INITIALIZE(Init) {
+			mmu = new MMU();
+			reg = new CPURegister();
+			flags = new CPUFlags();
+			cpu = new CPU(mmu, reg, flags);
+			//Set PC to zero
+			reg->Write16(reg, PC, 0x0000);
+			cpu->SetCycleCounter(0);
+		}
+
+		uint8_t getR1(uint8_t opcode) {
+			return (uint8_t)floor((opcode / 8.0f) - 8.0f);
+		}
+
+		uint8_t getR2(uint8_t opcode) {
+			return (uint8_t)((fmod((opcode / 8.0f) - 8.0f, 8.0f) - (float)floor((opcode / 8.0f) - 8.0f)) / 0.125f);
+		}
+
+		TEST_METHOD(LdNnnForAAWorks) {
+			reg->Write8(reg, A, 0x01);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, A));
+			cpu->LdR1R2(0x7F);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, A));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForABWorks) {
+			reg->Write8(reg, B, 0x01);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, B));
+			cpu->LdR1R2(0x78);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, A));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForACWorks) {
+			reg->Write8(reg, C, 0x02);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, C));
+			cpu->LdR1R2(0x79);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, A));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForADWorks) {
+			reg->Write8(reg, D, 0x03);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, D));
+			cpu->LdR1R2(0x7A);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, A));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForAEWorks) {
+			reg->Write8(reg, E, 0x04);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, E));
+			cpu->LdR1R2(0x7B);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, A));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForAHWorks) {
+			reg->Write8(reg, H, 0x05);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, H));
+			cpu->LdR1R2(0x7C);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, A));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+		TEST_METHOD(LdNnnForALWorks) {
+			reg->Write8(reg, L, 0x06);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, L));
+			cpu->LdR1R2(0x7D);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, A));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForAHLWorks) {
+			reg->Write16(reg, HL, 0x1010);
+			mmu->WriteMemory8(mmu, reg->Read16(reg, HL), 0x07);
+			Assert::AreEqual((uint8_t)0x07, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			cpu->LdR1R2(0x7E);
+			Assert::AreEqual((uint8_t)0x07, reg->Read8(reg, A));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+		TEST_METHOD(LdNnnForBBWorks) {
+			reg->Write8(reg, B, 0x01);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, B));
+			cpu->LdR1R2(0x40);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, B));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForBCWorks) {
+			reg->Write8(reg, C, 0x02);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, C));
+			cpu->LdR1R2(0x41);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, B));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForBDWorks) {
+			reg->Write8(reg, D, 0x03);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, D));
+			cpu->LdR1R2(0x42);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, B));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForBEWorks) {
+			reg->Write8(reg, E, 0x04);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, E));
+			cpu->LdR1R2(0x43);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, B));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForBHWorks) {
+			reg->Write8(reg, H, 0x05);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, H));
+			cpu->LdR1R2(0x44);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, B));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForBLWorks) {
+			reg->Write8(reg, L, 0x06);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, L));
+			cpu->LdR1R2(0x45);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, B));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForBHLWorks) {
+			reg->Write16(reg, HL, 0x1010);
+			mmu->WriteMemory8(mmu, reg->Read16(reg, HL), 0x07);
+			Assert::AreEqual((uint8_t)0x07, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			cpu->LdR1R2(0x46);
+			Assert::AreEqual((uint8_t)0x07, reg->Read8(reg, B));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+		TEST_METHOD(LdNnnForCBWorks) {
+			reg->Write8(reg, B, 0x01);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, B));
+			cpu->LdR1R2(0x48);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, C));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForCCWorks) {
+			reg->Write8(reg, C, 0x02);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, C));
+			cpu->LdR1R2(0x49);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, C));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForCDWorks) {
+			reg->Write8(reg, D, 0x03);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, D));
+			cpu->LdR1R2(0x4A);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, C));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForCEWorks) {
+			reg->Write8(reg, E, 0x04);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, E));
+			cpu->LdR1R2(0x4B);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, C));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForCHWorks) {
+			reg->Write8(reg, H, 0x05);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, H));
+			cpu->LdR1R2(0x4C);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, C));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForCLWorks) {
+			reg->Write8(reg, L, 0x06);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, L));
+			cpu->LdR1R2(0x4D);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, C));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForCHLWorks) {
+			reg->Write16(reg, HL, 0x1010);
+			mmu->WriteMemory8(mmu, reg->Read16(reg, HL), 0x07);
+			Assert::AreEqual((uint8_t)0x07, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			cpu->LdR1R2(0x4E);
+			Assert::AreEqual((uint8_t)0x07, reg->Read8(reg, C));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForDBWorks) {
+			reg->Write8(reg, B, 0x01);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, B));
+			cpu->LdR1R2(0x50);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, D));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForDCWorks) {
+			reg->Write8(reg, C, 0x02);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, C));
+			cpu->LdR1R2(0x51);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, D));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForDDWorks) {
+			reg->Write8(reg, D, 0x03);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, D));
+			cpu->LdR1R2(0x52);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, D));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForDEWorks) {
+			reg->Write8(reg, E, 0x04);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, E));
+			cpu->LdR1R2(0x53);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, D));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForDHWorks) {
+			reg->Write8(reg, H, 0x05);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, H));
+			cpu->LdR1R2(0x54);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, D));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForDLWorks) {
+			reg->Write8(reg, L, 0x06);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, L));
+			cpu->LdR1R2(0x55);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, D));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForDHLWorks) {
+			reg->Write16(reg, HL, 0x1010);
+			mmu->WriteMemory8(mmu, reg->Read16(reg, HL), 0x07);
+			Assert::AreEqual((uint8_t)0x07, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			cpu->LdR1R2(0x56);
+			Assert::AreEqual((uint8_t)0x07, reg->Read8(reg, D));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForEBWorks) {
+			reg->Write8(reg, B, 0x01);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, B));
+			cpu->LdR1R2(0x58);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, E));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForECWorks) {
+			reg->Write8(reg, C, 0x02);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, C));
+			cpu->LdR1R2(0x59);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, E));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForEDWorks) {
+			reg->Write8(reg, D, 0x03);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, D));
+			cpu->LdR1R2(0x5A);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, E));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForEEWorks) {
+			reg->Write8(reg, E, 0x04);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, E));
+			cpu->LdR1R2(0x5B);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, E));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForEHWorks) {
+			reg->Write8(reg, H, 0x05);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, H));
+			cpu->LdR1R2(0x5C);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, E));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForELWorks) {
+			reg->Write8(reg, L, 0x06);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, L));
+			cpu->LdR1R2(0x5D);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, E));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForEHLWorks) {
+			reg->Write16(reg, HL, 0x1010);
+			mmu->WriteMemory8(mmu, reg->Read16(reg, HL), 0x07);
+			Assert::AreEqual((uint8_t)0x07, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			cpu->LdR1R2(0x5E);
+			Assert::AreEqual((uint8_t)0x07, reg->Read8(reg, E));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+
+		TEST_METHOD(LdNnnForHBWorks) {
+			reg->Write8(reg, B, 0x01);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, B));
+			cpu->LdR1R2(0x60);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, H));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHCWorks) {
+			reg->Write8(reg, C, 0x02);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, C));
+			cpu->LdR1R2(0x61);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, H));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHDWorks) {
+			reg->Write8(reg, D, 0x03);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, D));
+			cpu->LdR1R2(0x62);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, H));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHEWorks) {
+			reg->Write8(reg, E, 0x04);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, E));
+			cpu->LdR1R2(0x63);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, H));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHHWorks) {
+			reg->Write8(reg, H, 0x05);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, H));
+			cpu->LdR1R2(0x64);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, H));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHLWorks) {
+			reg->Write8(reg, L, 0x06);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, L));
+			cpu->LdR1R2(0x65);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, H));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHHLWorks) {
+			reg->Write16(reg, HL, 0x1010);
+			mmu->WriteMemory8(mmu, reg->Read16(reg, HL), 0x07);
+			Assert::AreEqual((uint8_t)0x07, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			cpu->LdR1R2(0x66);
+			Assert::AreEqual((uint8_t)0x07, reg->Read8(reg, H));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForLBWorks) {
+			reg->Write8(reg, B, 0x01);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, B));
+			cpu->LdR1R2(0x68);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, L));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForLCWorks) {
+			reg->Write8(reg, C, 0x02);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, C));
+			cpu->LdR1R2(0x69);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, L));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForLDWorks) {
+			reg->Write8(reg, D, 0x03);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, D));
+			cpu->LdR1R2(0x6A);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, L));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForLEWorks) {
+			reg->Write8(reg, E, 0x04);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, E));
+			cpu->LdR1R2(0x6B);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, L));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForLHWorks) {
+			reg->Write8(reg, H, 0x05);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, H));
+			cpu->LdR1R2(0x6C);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, L));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForLLWorks) {
+			reg->Write8(reg, L, 0x06);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, L));
+			cpu->LdR1R2(0x6D);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, L));
+			Assert::AreEqual((uint32_t)4, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForLHLWorks) {
+			reg->Write16(reg, HL, 0x1010);
+			mmu->WriteMemory8(mmu, reg->Read16(reg, HL), 0x07);
+			Assert::AreEqual((uint8_t)0x07, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			cpu->LdR1R2(0x6E);
+			Assert::AreEqual((uint8_t)0x07, reg->Read8(reg, L));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHLBWorks) {
+			reg->Write8(reg, B, 0x01);
+			Assert::AreEqual((uint8_t)0x01, reg->Read8(reg, B));
+			cpu->LdR1R2(0x70);
+			Assert::AreEqual((uint8_t)0x01, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHLCWorks) {
+			reg->Write8(reg, C, 0x02);
+			Assert::AreEqual((uint8_t)0x02, reg->Read8(reg, C));
+			cpu->LdR1R2(0x71);
+			Assert::AreEqual((uint8_t)0x02, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHLDWorks) {
+			reg->Write8(reg, D, 0x03);
+			Assert::AreEqual((uint8_t)0x03, reg->Read8(reg, D));
+			cpu->LdR1R2(0x72);
+			Assert::AreEqual((uint8_t)0x03, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHLEWorks) {
+			reg->Write8(reg, E, 0x04);
+			Assert::AreEqual((uint8_t)0x04, reg->Read8(reg, E));
+			cpu->LdR1R2(0x73);
+			Assert::AreEqual((uint8_t)0x04, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHLHWorks) {
+			reg->Write8(reg, H, 0x05);
+			Assert::AreEqual((uint8_t)0x05, reg->Read8(reg, H));
+			cpu->LdR1R2(0x74);
+			Assert::AreEqual((uint8_t)0x05, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHLLWorks) {
+			reg->Write8(reg, L, 0x06);
+			Assert::AreEqual((uint8_t)0x06, reg->Read8(reg, L));
+			cpu->LdR1R2(0x75);
+			Assert::AreEqual((uint8_t)0x06, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+		}
+
+		TEST_METHOD(LdNnnForHLNWorks) {			
+			mmu->WriteMemory8(mmu, reg->Read8(reg, PC), 0x11);
+			Assert::AreEqual((uint8_t)0x11, mmu->ReadMemory8(mmu, reg->Read16(reg, PC)));
+			cpu->LdR1R2(0x36);
+			Assert::AreEqual((uint8_t)0x11, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
+			Assert::AreEqual((uint32_t)12, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
 		}
 	};
 }
