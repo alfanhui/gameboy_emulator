@@ -1,19 +1,40 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "../GameBoyEmulator/CPU.h"
-#include "../GameBoyEmulator/CPU.cpp"
-#include "../GameBoyEmulator/CPURegister.h"
-#include "../GameBoyEmulator/CPURegister.cpp"
-#include "../GameBoyEmulator/MMU.h"
-#include "../GameBoyEmulator/MMU.cpp"
-#include "../GameBoyEmulator/FileLoader.h"
-#include "../GameBoyEmulator/FileLoader.cpp"
-
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace CPUTests
 {
+	TEST_CLASS(UtilFuncs)
+	{
+	public:
+		MMU* mmu;
+		CPURegister* reg;
+		CPUFlags* flags;
+		CPU* cpu;
+
+		TEST_METHOD_INITIALIZE(Init) {
+			mmu = new MMU();
+			reg = new CPURegister();
+			flags = new CPUFlags();
+			cpu = new CPU(mmu, reg, flags);
+		}
+
+		TEST_METHOD(ByteSwapWorks) {
+			uint16_t value = 0x01 << 8 | 0x02;
+			uint16_t expected = 0x02 << 8 | 0x01;
+			Assert::IsTrue(value != expected);
+			uint16_t switched_value = cpu->ByteSwap(value);
+			Assert::IsTrue(switched_value == expected);
+		}
+
+		TEST_METHOD(TestBit) {
+			uint8_t value = 0x01;
+			Assert::IsTrue((value & 1) ? 1 : 0);
+		}
+	};
+
 	TEST_CLASS(LdNnn)
 	{
 	public:
@@ -32,48 +53,76 @@ namespace CPUTests
 			cpu->SetCycleCounter(0);
 		}
 
-		void LdNnnTest(uint8_t opcode, uint8_t random_number1, uint8_t random_number2)
-		{
+		TEST_METHOD(LdNnnForBWorks) {
 			//Setup reg and next 8bit number for test
-			reg->Write8(reg, ((opcode + 2) / 8) - 1, random_number1);
-			mmu->WriteMemory8(mmu, 0x0000, random_number2);
+			mmu->WriteMemory8(mmu, reg->Read8(reg, PC), 0x01);
 			//Test
-			cpu->LdNnn(opcode);
+			cpu->LdNnn(0x06);
 			//Results
-			uint8_t value = mmu->ReadMemory8(mmu, random_number2);
-			Assert::AreEqual(random_number1, value);
+			uint8_t value = reg->Read8(reg, B);
+			Assert::AreEqual((uint8_t)0x01, value);
 			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
 			Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
 		}
 
-		TEST_METHOD(LdNnnForBWorks) {
-			Assert::AreEqual(B, ((0x06 + 2) / 8) - 1);
-			LdNnnTest(0x06, 0x01, 0x05);
-		}
-
 		TEST_METHOD(LdNnnForCWorks) {
-			Assert::AreEqual(C, ((0x0E + 2) / 8) - 1);
-			LdNnnTest(0x0E, 0x10, 0x15);
+			//Setup reg and next 8bit number for test
+			mmu->WriteMemory8(mmu, reg->Read8(reg, PC), 0x10);
+			//Test
+			cpu->LdNnn(0x0E);
+			//Results
+			uint8_t value = reg->Read8(reg, C);
+			Assert::AreEqual((uint8_t)0x10, value);
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
 		}
 
 		TEST_METHOD(LdNnnForDWorks) {
-			Assert::AreEqual(D, ((0x16 + 2) / 8) - 1);
-			LdNnnTest(0x16, 0x20, 0x25);
+			//Setup reg and next 8bit number for test
+			mmu->WriteMemory8(mmu, reg->Read8(reg, PC), 0x20);
+			//Test
+			cpu->LdNnn(0x16);
+			//Results
+			uint8_t value = reg->Read8(reg, D);
+			Assert::AreEqual((uint8_t)0x20, value);
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
 		}
 
 		TEST_METHOD(LdNnnForEWorks) {
-			Assert::AreEqual(E, ((0x1E + 2) / 8) - 1);
-			LdNnnTest(0x1E, 0x30, 0x35);
+			//Setup reg and next 8bit number for test
+			mmu->WriteMemory8(mmu, reg->Read8(reg, PC), 0x30);
+			//Test
+			cpu->LdNnn(0x1E);
+			//Results
+			uint8_t value = reg->Read8(reg, E);
+			Assert::AreEqual((uint8_t)0x30, value);
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
 		}
 
 		TEST_METHOD(LdNnnForHWorks) {
-			Assert::AreEqual(H, ((0x26 + 2) / 8) - 1);
-			LdNnnTest(0x26, 0x40, 0x45);
+			//Setup reg and next 8bit number for test
+			mmu->WriteMemory8(mmu, reg->Read8(reg, PC), 0x40);
+			//Test
+			cpu->LdNnn(0x26);
+			//Results
+			uint8_t value = reg->Read8(reg, H);
+			Assert::AreEqual((uint8_t)0x40, value);
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
 		}
 
 		TEST_METHOD(LdNnnForLWorks) {
-			Assert::AreEqual(L, ((0x2E + 2) / 8) - 1);
-			LdNnnTest(0x2E, 0x50, 0x55);
+			//Setup reg and next 8bit number for test
+			mmu->WriteMemory8(mmu, reg->Read8(reg, PC), 0x50);
+			//Test
+			cpu->LdNnn(0x2E);
+			//Results
+			uint8_t value = reg->Read8(reg, L);
+			Assert::AreEqual((uint8_t)0x50, value);
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
 		}
 	};
 
@@ -93,14 +142,6 @@ namespace CPUTests
 			//Set PC to zero
 			reg->Write16(reg, PC, 0x0000);
 			cpu->SetCycleCounter(0);
-		}
-
-		uint8_t getR1(uint8_t opcode) {
-			return (uint8_t)floor((opcode / 8.0f) - 8.0f);
-		}
-
-		uint8_t getR2(uint8_t opcode) {
-			return (uint8_t)((fmod((opcode / 8.0f) - 8.0f, 8.0f) - (float)floor((opcode / 8.0f) - 8.0f)) / 0.125f);
 		}
 
 		TEST_METHOD(LdNnnForAAWorks) {
@@ -563,6 +604,133 @@ namespace CPUTests
 			Assert::AreEqual((uint8_t)0x11, mmu->ReadMemory8(mmu, reg->Read16(reg, HL)));
 			Assert::AreEqual((uint32_t)12, cpu->GetCycleCounter());
 			Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
+		}
+	};
+
+
+	TEST_CLASS(LdNnn16)
+	{
+	public:
+		MMU* mmu;
+		CPURegister* reg;
+		CPUFlags* flags;
+		CPU* cpu;
+
+		TEST_METHOD_INITIALIZE(Init) {
+			mmu = new MMU();
+			reg = new CPURegister();
+			flags = new CPUFlags();
+			cpu = new CPU(mmu, reg, flags);
+			//Set PC to zero
+			reg->Write16(reg, PC, 0x0000);
+			cpu->SetCycleCounter(0);
+
+			//Set all flags to be different to aid tests
+			reg->Write16(reg, BC, 0x10);
+			reg->Write16(reg, DE, 0x20);
+			reg->Write16(reg, AF, 0x30);
+			reg->Write16(reg, HL, 0x40);
+			reg->Write16(reg, SP, 0x50);
+		}
+
+		TEST_METHOD(LdNNn16ForBCWorks) {		
+			//Setup reg and next 16bit number for test
+			mmu->WriteMemory16(mmu, reg->Read16(reg, PC), (uint16_t)0x37);
+			//Test
+			cpu->LdNNn16(0x01);
+			//Results
+			uint16_t value = mmu->ReadMemory16(mmu, reg->Read16(reg, BC));
+			Assert::IsTrue((uint16_t)0x37 == value);
+			Assert::AreEqual((uint32_t)12, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)2, reg->Read8(reg, PC)); //Must increase as it read next value
+		}
+
+		TEST_METHOD(LdNNn16ForDEWorks) {
+			//Setup reg and next 16bit number for test
+			mmu->WriteMemory16(mmu, reg->Read16(reg, PC), (uint16_t)0x47);
+			//Test
+			cpu->LdNNn16(0x11);
+			//Results
+			uint16_t value = mmu->ReadMemory16(mmu, reg->Read16(reg, DE));
+			Assert::IsTrue((uint16_t)0x47 == value);
+			Assert::AreEqual((uint32_t)12, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)2, reg->Read8(reg, PC)); //Must increase as it read next value
+		}
+
+		TEST_METHOD(LdNNn16ForHLWorks) {
+			//Setup reg and next 16bit number for test
+			mmu->WriteMemory16(mmu, reg->Read16(reg, PC), (uint16_t)0x57);
+			//Test
+			cpu->LdNNn16(0x21);
+			//Results
+			uint16_t value = mmu->ReadMemory16(mmu, reg->Read16(reg, HL));
+			Assert::IsTrue((uint16_t)0x57 == value);
+			Assert::AreEqual((uint32_t)12, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)2, reg->Read8(reg, PC)); //Must increase as it read next value
+		}
+
+		TEST_METHOD(LdNNn16ForSPWorks) {
+			//Setup reg and next 16bit number for test
+			mmu->WriteMemory16(mmu, reg->Read16(reg, PC), (uint16_t)0x67);
+			//Test
+			cpu->LdNNn16(0x31);
+			//Results
+			uint16_t value = mmu->ReadMemory16(mmu, reg->Read16(reg, SP));
+			Assert::IsTrue((uint16_t)0x67 == value);
+			Assert::AreEqual((uint32_t)12, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)2, reg->Read8(reg, PC)); //Must increase as it read next value
+		}
+	};
+
+	TEST_CLASS(AddHlN16)
+	{
+	public:
+		MMU* mmu;
+		CPURegister* reg;
+		CPUFlags* flags;
+		CPU* cpu;
+
+		TEST_METHOD_INITIALIZE(Init) {
+			mmu = new MMU();
+			reg = new CPURegister();
+			flags = new CPUFlags();
+			cpu = new CPU(mmu, reg, flags);
+			//Set PC to zero
+			reg->Write16(reg, PC, 0x0000);
+			cpu->SetCycleCounter(0);
+		}
+
+		void AddHlN16Test(uint8_t opcode, uint8_t random_number1, uint8_t random_number2)
+		{
+			////Setup reg and next 8bit number for test
+			//mmu->WriteMemory8(mmu, reg->Read8(reg, PC), random_number1);
+			////Test
+			//cpu->LdNNn16(opcode);
+			////Results
+			//uint8_t value = reg->Read8(reg, ((opcode + 2) / 8) - 1);
+			//Assert::AreEqual(random_number1, value);
+			//Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			//Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
+		}
+
+		TEST_METHOD(AddHlN16ForBCWorks) {
+			Assert::AreEqual(BC, 0x09 == 0x39 ? SP : ((0x09 - 1) / 8) - 1);
+			//AddANTest(0x06, 0x01, 0x05);
+		}
+
+		TEST_METHOD(AddHlN16ForDEWorks) {
+			Assert::AreEqual(DE, 0x19 == 0x39 ? SP : ((0x19 - 1) / 8) - 1);
+			//AddANTest(0x0E, 0x10, 0x15);
+		}
+
+		TEST_METHOD(AddHlN16ForHLWorks) {
+			Assert::AreEqual(HL, 0x29 == 0x39 ? SP : ((0x29 - 1) / 8) - 1);
+			//AddANTest(0x16, 0x20, 0x25);
+		}
+
+		TEST_METHOD(AddHlN16ForSPWorks) {
+			Assert::AreEqual(SP, 0x39 == 0x39 ? SP : ((0x39 - 1) / 8) - 1);
+			//AddANTest(0x1E, 0x30, 0x35);
 		}
 	};
 }

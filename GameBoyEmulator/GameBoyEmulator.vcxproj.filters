@@ -55,8 +55,5 @@
     <None Include="..\dmg_boot.bin">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Pokemon - Blue Version (UE) (S).gb">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

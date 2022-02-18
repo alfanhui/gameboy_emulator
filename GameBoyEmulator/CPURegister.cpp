@@ -22,4 +22,3 @@ void CPURegister::Write16(CPURegister* reg, uint16_t addr, uint16_t data)
 	uint16_t* pos = ((uint16_t*)(reg->array + addr));
 	*pos = data;
 }
-

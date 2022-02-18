@@ -20,6 +20,7 @@ constexpr auto PC = 0x0A;
 struct CPURegister
 {
 	const char* labels[8] = { "B", "C", "D", "E", "H", "L", "A", "F"};
+	const char* labels16[11] = { "BC", "?", "DE", "?", "HL", "?", "AF", "?", "SP", "?", "PC"};
 	union {
 		uint8_t array[12];
 		struct {

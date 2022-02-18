@@ -9,6 +9,12 @@ void CPU::SetCycleCounter(uint32_t cycleCounter) {
 	_cycleCounter = cycleCounter;
 }
 
+uint16_t CPU::ByteSwap(uint16_t number) {
+	uint8_t hibyte = (number & 0xff00) >> 8;
+	uint8_t lobyte = (number & 0xff);
+	return lobyte << 8 | hibyte;
+}
+
 void CPU::RunInstruction(uint8_t opcode)
 {
 	switch (opcode) {
@@ -67,7 +73,6 @@ void CPU::RunInstruction(uint8_t opcode)
 			LdhAN(opcode);
 			break;
 		case 0x01: case 0x11: case 0x21: case 0x31:
-			std::cout << "LD16 N, nn";
 			LdNNn16(opcode);
 			break;
 		case 0xF9:
@@ -227,7 +232,6 @@ void CPU::RunInstruction(uint8_t opcode)
 			JrN();
 			break;
 		case 0x20: case 0x28: case 0x30: case 0x38:
-			std::cout << "JR cc, n";
 			JrCcN(opcode);
 			break;
 		case 0xCD:
@@ -256,13 +260,13 @@ void CPU::RunInstruction(uint8_t opcode)
 }
 
 //Desc: Put value nn into n.
+// Don't listen to the docs, put immediate value into Reg
 // p65
 void CPU::LdNnn(uint8_t opcode) {
 	std::cout << "LD " << _reg->labels[((opcode + 2) / 8) - 1] << ", nn";
 
-	uint8_t addr = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	uint8_t value = _reg->Read8(_reg, ((opcode + 2) / 8) - 1);
-	_mmu->WriteMemory8(_mmu, addr, value);
+	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read8(_reg, PC));
+	_reg->Write8(_reg, ((opcode + 2) / 8) - 1, value);
 	_cycleCounter += 8;
 	_reg->array[PC]++; //Must increase as we took a value off the next instruction
 }
@@ -271,11 +275,10 @@ void CPU::LdNnn(uint8_t opcode) {
 void CPU::LdR1R2(uint8_t opcode) {
 	if (opcode == 0x36) { //edge case [12 cycles]
 		std::cout << "LD (HL), n";
-		uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
+		uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read8(_reg, PC));
 		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), value);
 		_cycleCounter += 12;
 		_reg->array[PC]++;
-		//_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
 		return;
 	}
 	float r = (opcode / 8.0f) - 8.0f;
@@ -317,6 +320,7 @@ void CPU::LdR1R2(uint8_t opcode) {
 
 //Put value n into A.
 void CPU::LdAN(uint8_t opcode) {
+	uint16_t addr;
 	switch (opcode) {
 		case 0x0A:
 			std::cout << "LD A, (BC)";
@@ -330,14 +334,15 @@ void CPU::LdAN(uint8_t opcode) {
 			break;
 		case 0xFA:
 			std::cout << "LD A, nn";
-			uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC)); // 16 cycles
-			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, addr)); 
+			addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC)); // 16 cycles
+			//Last byte first
+			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, ByteSwap(addr)));
 			_cycleCounter += 16;
-			_reg->array[PC] = _reg->array[PC] + 2;
+			_reg->array[PC] += 2;
 			break;
 		case 0x3E:
 			std::cout << "LD A, (PC)";
-			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC))); // 8 cycles
+			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read8(_reg, PC))); // 8 cycles
 			_cycleCounter += 8;
 			_reg->array[PC]++;
 			break;
@@ -360,10 +365,11 @@ void CPU::LdNA(uint8_t opcode) {
 		n = _reg->Read16(_reg, HL); //8 cycles
 		_cycleCounter += 8;
 break;
-	case 0xEA:
-		n = _reg->Read16(_reg, PC); //16 cycles
+	case 0xEA: //LS byte first
+		n = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC)); //16 cycles
+		n = ByteSwap(n);
 		_cycleCounter += 16;
-		_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
+		_reg->array[PC] = _reg->array[PC] + 2;
 		break;
 	}
 	_mmu->WriteMemory8(_mmu, n, _reg->a); //4 cycles
@@ -415,7 +421,7 @@ void CPU::LdhNA(uint8_t opcode) {
 	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 	_mmu->WriteMemory8(_mmu, (0xFF00 + value), _reg->a);
 	_cycleCounter += 12;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 1);
+	_reg->array[PC] ++; //Must increase as we took a value off the next instruction
 }
 
 //Put memory address $FF00 + n into A. [12 cycles]
@@ -423,15 +429,17 @@ void CPU::LdhAN(uint8_t opcode) {
 	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 	_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, 0xFF00 + value));
 	_cycleCounter += 12;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
+	_reg->array[PC]+= 2; //Must increase as we took a value off the next instruction
 }
 
 //Put 16byte value nn into n. 12 cycles
 void CPU::LdNNn16(uint8_t opcode) {
-	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, (((opcode - 1) / 16) * 2)), value);
+	uint16_t value = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
+	uint8_t n = opcode == 0x31 ? SP : ((opcode - 1) / 16) * 2; //SP is offset by A
+	std::cout << "LD " << _reg->labels16[n] << "," << std::hex << value;
+	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, n), value);
 	_cycleCounter += 12;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
+	_reg->array[PC] += 2; //Must increase as we took a value off the next instruction
 }
 
 //Put HL into SP [8 cycles]
@@ -450,14 +458,14 @@ void CPU::LdHlSpn(uint8_t opcode) {
 	(_reg->Read16(_reg, SP) + value) > 0xFF ? _flags->SetOneAtMask(FLAG_H): _flags->SetZeroAtMask(FLAG_H); //TODO: Check condition
 	(((_reg->Read16(_reg, SP) & 0xF) + (value & 0xF)) > 0xF) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //TODO: Check condition
 	_cycleCounter += 12;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
+	_reg->array[PC] += 2; //Must increase as we took a value off the next instruction
 }
 
 //Put Stack Pointer (SP) at address nn [20 cycles]
 void CPU::LdNnSp(uint8_t opcode) {
 	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, PC), _reg->Read16(_reg, SP));
 	_cycleCounter += 20;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
+	_reg->array[PC] += 2; //Must increase as we took a value off the next instruction
 }
 
 //Push register pair nn onto stack. Decrement Stack Pointer (SP) twice [16 cycles]
@@ -677,6 +685,7 @@ void CPU::OrAN(uint8_t opcode) {
 }
 
 //Logical exclusive OR n with register A, result in A.
+//TODO test
 void CPU::XorAN(uint8_t opcode) {
 	uint8_t n;
 	if (opcode == 0xAE) { //edge case [8 cycles]
@@ -699,7 +708,7 @@ void CPU::XorAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, value);
 
 	//Set flags
-	if ((value == 0)) {
+	if (value == 0) {
 		_flags->SetOneAtMask(FLAG_Z);
 	}
 	_flags->SetZeroAtMask(FLAG_N);
@@ -718,7 +727,7 @@ void CPU::CpaN(uint8_t opcode) {
 	else if (opcode == 0xFE) { //edge case [8 cycles]
 		n = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
 		_cycleCounter += 8;
-		_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 1);
+		_reg->array[PC] ++; //Must increase as we took a value off the next instruction
 	}
 	else if (opcode == 0xBF) { //A,A edge case [4 cycles]
 		n = _reg->Read8(_reg, (opcode - 185));
@@ -832,7 +841,7 @@ void CPU::AddSpN16(uint8_t opcode) {
 	((sp_value & 0xF) + (n & 0xF) > 0xF) ? _flags->SetOneAtMask(FLAG_H) : _flags->SetZeroAtMask(FLAG_H); //TODO check condition
 	((sp_value + n) > 0xFF) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //TODO check condition
 	_cycleCounter += 16;
-	_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + 2);
+	_reg->array[PC] += 2; //Must increase as we took a value off the next instruction
 }
 
 //Increment nn [8 cycles]
@@ -2049,7 +2058,7 @@ void CPU::Res7(uint8_t cb_opcode) {
 //Jump to address nn [12 cycles]
 void CPU::JpNn() {
 	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write16(_reg, PC, addr);
+	_reg->Write16(_reg, PC, ByteSwap(addr));
 	_cycleCounter += 12;
 }
 
@@ -2058,25 +2067,27 @@ void CPU::JpCcNn(uint8_t opcode) {
 	switch (opcode) {
 	case 0xC2:
 		if (_flags->GetFlag(FLAG_Z) == 0) {
-			JpNn();
+			return JpNn();
 		}
 		break;
 	case 0xCA:
 		if (_flags->GetFlag(FLAG_Z) == 1) {
-			JpNn();
+			return JpNn();
 		}
 		break;
 	case 0xD2:
 		if (_flags->GetFlag(FLAG_C) == 0) { 
-			JpNn(); 
+			return JpNn();
 		}
 		break;
 	case 0xDA:
 		if (_flags->GetFlag(FLAG_C) == 1) {
-			JpNn();
+			return JpNn();
 		}
 		break;
 	}
+	_reg->array[PC]+=2;
+	_cycleCounter += 12;
 }
 
 //Jump to address contained in HL [4 cycles]
@@ -2088,54 +2099,52 @@ void CPU::JpHl() {
 
 //Add n to current address and jump to it [8 cycles]
 void CPU::JrN() {
- 	uint16_t addr = _reg->Read16(_reg, PC) + (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC)); //+1 out?
-	_reg->Write16(_reg, PC, addr + 1);
+	std::cout << "jumping..";
+ 	uint16_t addr = _reg->Read16(_reg, PC) + (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
+	_reg->Write16(_reg, PC, addr); // TODO was +1
 	_cycleCounter += 8;
 }
 
 //if following condition is true then add n to current  address and jump to it
 // P
 void CPU::JrCcN(uint8_t opcode) {
-	_cycleCounter += 4;
+	uint16_t addr = _reg->Read16(_reg, PC) + (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC)); //debug print only
 	switch (opcode) {
 	case 0x20:
-		std::cout << " NZ " << (bool)_flags->GetFlag(FLAG_Z);
+		std::cout << "JR NZ" << ", Addr_" << addr << " (Z=" << (bool)_flags->GetFlag(FLAG_Z) << ")";
 		if (_flags->GetFlag(FLAG_Z) == 0) {
 			return JrN();
 		}
 		break;
 	case 0x28:
-		std::cout << " Z " << (bool)_flags->GetFlag(FLAG_Z);
+		std::cout << "JR Z" << ", Addr_" << addr << " (Z=" << (bool)_flags->GetFlag(FLAG_Z) << ")";
 		if (_flags->GetFlag(FLAG_Z) == 1) {
 			return JrN();
 		}
 		break;
 	case 0x30:
-		std::cout << " NC " << (bool)_flags->GetFlag(FLAG_C);
+		std::cout << "JR NC" << ", Addr_" << addr << " (C=" << (bool)_flags->GetFlag(FLAG_C) << ")";
 		if (_flags->GetFlag(FLAG_C) == 0) {
 			return JrN();
 		}
 		break;
 	case 0x38:
-		std::cout << " C " << (bool)_flags->GetFlag(FLAG_C);
+		std::cout << "JR C" << ", Addr_" << addr << " (C=" << (bool)_flags->GetFlag(FLAG_C) << ")";
 		if (_flags->GetFlag(FLAG_C) == 1) {
 			return JrN();
 		}
 		break;
 	}
-	_reg->array[PC] += 1;
+	_reg->array[PC]++;
+	_cycleCounter += 8;
 }
 
 //Push address of next instruction onto stack and then jump to address nn. [12 cycles]
 void CPU::CallNn() {
-	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
-	//_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2);
-	//_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, SP), _reg->Read16(_reg, PC));
-	//_reg->Write16(_reg, PC, addr);
-	
-	_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2);
-	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, SP), _reg->Read16(_reg, PC));
-	_reg->array[PC]+=1; //TODO check: was +2
+	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));	
+	_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2); //TODO WHY AM I DOING THIS?
+	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, SP), ByteSwap(addr));
+	_reg->array[PC]+=2;
 	_cycleCounter += 12;
 }
 
