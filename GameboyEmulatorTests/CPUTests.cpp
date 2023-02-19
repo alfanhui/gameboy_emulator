@@ -607,7 +607,6 @@ namespace CPUTests
 		}
 	};
 
-
 	TEST_CLASS(LdNnn16)
 	{
 	public:
@@ -699,38 +698,94 @@ namespace CPUTests
 			reg->Write16(reg, PC, 0x0000);
 			cpu->SetCycleCounter(0);
 		}
-
-		void AddHlN16Test(uint8_t opcode, uint8_t random_number1, uint8_t random_number2)
-		{
-			////Setup reg and next 8bit number for test
-			//mmu->WriteMemory8(mmu, reg->Read8(reg, PC), random_number1);
-			////Test
-			//cpu->LdNNn16(opcode);
-			////Results
-			//uint8_t value = reg->Read8(reg, ((opcode + 2) / 8) - 1);
-			//Assert::AreEqual(random_number1, value);
-			//Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
-			//Assert::AreEqual((uint8_t)1, reg->Read8(reg, PC)); //Must increase as it read next value
-		}
-
 		TEST_METHOD(AddHlN16ForBCWorks) {
-			Assert::AreEqual(BC, 0x09 == 0x39 ? SP : ((0x09 - 1) / 8) - 1);
-			//AddANTest(0x06, 0x01, 0x05);
+			//Setup reg
+			reg->Write16(reg, BC, (uint16_t)0x06);
+			reg->Write16(reg, HL, (uint16_t)0x2c);
+			//Test
+			cpu->AddHlN16(0x09);
+			//Results
+			uint16_t value = reg->Read16(reg, HL);
+			Assert::IsTrue(value == 0x32);
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)0, reg->Read8(reg, PC)); //Mustn't increase PC
 		}
 
 		TEST_METHOD(AddHlN16ForDEWorks) {
-			Assert::AreEqual(DE, 0x19 == 0x39 ? SP : ((0x19 - 1) / 8) - 1);
-			//AddANTest(0x0E, 0x10, 0x15);
+			//Setup reg
+			reg->Write16(reg, DE, (uint16_t)0x10);
+			reg->Write16(reg, HL, (uint16_t)0x08);
+			//Test
+			cpu->AddHlN16(0x19);
+			//Results
+			uint16_t value = reg->Read16(reg, HL);
+			Assert::IsTrue(value == 0x18);
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)0, reg->Read8(reg, PC)); //Mustn't increase PC
 		}
 
 		TEST_METHOD(AddHlN16ForHLWorks) {
-			Assert::AreEqual(HL, 0x29 == 0x39 ? SP : ((0x29 - 1) / 8) - 1);
-			//AddANTest(0x16, 0x20, 0x25);
+			//Setup reg
+			reg->Write16(reg, HL, (uint16_t)0x56);
+			//Test
+			cpu->AddHlN16(0x29);
+			//Results
+			uint16_t value = reg->Read16(reg, HL);
+			Assert::IsTrue(value == 0xac);
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)0, reg->Read8(reg, PC)); //Mustn't increase PC
 		}
 
 		TEST_METHOD(AddHlN16ForSPWorks) {
 			Assert::AreEqual(SP, 0x39 == 0x39 ? SP : ((0x39 - 1) / 8) - 1);
-			//AddANTest(0x1E, 0x30, 0x35);
+			//Setup reg
+			reg->Write16(reg, SP, (uint16_t)0x04);
+			reg->Write16(reg, HL, (uint16_t)0x06);
+			//Test
+			cpu->AddHlN16(0x39);
+			//Results
+			uint16_t value = reg->Read16(reg, HL);
+			Assert::IsTrue(value == 0x0A);
+			Assert::AreEqual((uint32_t)8, cpu->GetCycleCounter());
+			Assert::AreEqual((uint8_t)0, reg->Read8(reg, PC)); //Mustn't increase PC
+		}
+
+		TEST_METHOD(AddHlN16CarryFlagH) {
+
+		}
+
+		TEST_METHOD(AddHlN16CarryFlagC) {
+
+		}
+
+		TEST_METHOD(AddHlN16ResetFlagN) {
+			//Setup reg
+			flags->SetOneAtMask(FLAG_N);
+			//Test
+			cpu->AddHlN16(0x39);
+			//Results
+			Assert::AreEqual(flags->GetFlag(FLAG_N), 0);
+			//Setup reg
+			flags->SetZeroAtMask(FLAG_N);
+			//Test
+			cpu->AddHlN16(0x39);
+			//Results
+			Assert::AreEqual(flags->GetFlag(FLAG_N), 0);
+		}
+
+		TEST_METHOD(AddHlN16UntouchedFlagZ) {
+			//Setup reg
+			flags->SetOneAtMask(FLAG_Z);
+			//Test
+			cpu->AddHlN16(0x39);
+			//Results
+			Assert::AreEqual(flags->GetFlag(FLAG_Z), 1);
+			//Setup reg
+			flags->SetZeroAtMask(FLAG_Z);
+			//Test
+			cpu->AddHlN16(0x39);
+			//Results
+			Assert::AreEqual(flags->GetFlag(FLAG_Z), 0);
 		}
 	};
 }

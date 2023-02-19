@@ -20,12 +20,11 @@ int main()
     mmu->LoadCartridge(mmu, CARTRIDGE_FILE_PATH);
 
     CPU* cpu = new CPU(mmu, reg, flags);
-
     //game loop
     do {
         uint8_t opcode = mmu->ReadMemory8(mmu, reg->Read8(reg, PC));
         std::cout << "Execute " << (int)reg->Read16(reg, PC) << ": " << std::hex << (int)opcode << " ";
-        reg->array[PC]++; //Next opcode
+        reg->array[PC]++; //Next value
         cpu->RunInstruction(opcode);
         std::cout << std::endl;
         Sleep(150);

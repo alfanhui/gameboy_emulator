@@ -10,7 +10,7 @@ constexpr auto FLAG_3 = 3;
 constexpr auto FLAG_C = 4; //(C)Carry Flag: Is set if a carry occurred from the last math op OR if register A is the smaller value when executing CP instuction.
 constexpr auto FLAG_H = 5; //(H)Half Carry Flag: Is set if a carry occurred from the lower nibble in last math op.
 constexpr auto FLAG_N = 6; //(N)Subtract flag: Is set if subtraction was performed in the last math instruction.
-constexpr auto FLAG_Z = 7; //(Z)Zero Flag: Is set when result of math opertation is zero or two values (when using CP instruction)
+constexpr auto FLAG_Z = 7; //(Z)Zero Flag: Is set when result of math operation is zero or two values (when using CP instruction)
 
 class CPUFlags {
 	std::bitset<8> _mask0{ 0b0000'0001 };
