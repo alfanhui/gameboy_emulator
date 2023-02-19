@@ -1393,7 +1393,9 @@ void CPU::RrcN(uint8_t cb_opcode) {
 	}
 
 	//Set remaining flags
-	_flags->SetZeroAtMask(FLAG_Z);
+	if (result == 0) {
+		_flags->SetOneAtMask(FLAG_Z);
+	}
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 }
