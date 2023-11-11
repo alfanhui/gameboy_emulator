@@ -271,7 +271,7 @@ void CPU::LdNnn(uint8_t opcode) {
 	std::cout << "LD " << _reg->labels[((opcode + 2) / 8) - 1] << ", nn";
 
 	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read8(_reg, PC));
-	_reg->Write8(_reg, ((opcode + 2) / 8) - 1, value);
+	_reg->Write8(_reg, (opcode - 0x06) >> 3, value); // Thanks ChatGPT
 	_cycleCounter += 8;
 	_reg->array[PC]++; 
 }
@@ -283,7 +283,7 @@ void CPU::LdR1R2(uint8_t opcode) {
 		uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read8(_reg, PC));
 		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), value);
 		_cycleCounter += 12;
-		_reg->array[PC]++;
+		//_reg->array[PC]++; TODO_CHATGPT
 		return;
 	}
 	float r = (opcode / 8.0f) - 8.0f;
@@ -329,17 +329,20 @@ void CPU::LdAN(uint8_t opcode) {
 	switch (opcode) {
 		case 0x0A:
 			std::cout << "LD A, (BC)";
-			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, BC))); // 4 cycles
+			// 4 cycles
+			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, BC)));
 			_cycleCounter += 4;
 			break;
 		case 0x1A:
 			std::cout << "LD A, (DE)";
-			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, DE))); // 4 cycles
+			// 4 cycles
+			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, DE)));
 			_cycleCounter += 4;
 			break;
 		case 0xFA:
 			std::cout << "LD A, nn";
-			addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC)); // 16 cycles
+			// 16 cycles
+			addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
 			//Last byte first
 			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, ByteSwap(addr)));
 			_cycleCounter += 16;
@@ -347,7 +350,8 @@ void CPU::LdAN(uint8_t opcode) {
 			break;
 		case 0x3E:
 			std::cout << "LD A, (PC)";
-			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read8(_reg, PC))); // 8 cycles
+			// 8 cycles
+			_reg->Write8(_reg, A, _mmu->ReadMemory8(_mmu, _reg->Read8(_reg, PC)));
 			_cycleCounter += 8;
 			_reg->array[PC]++;
 			break;
@@ -359,25 +363,32 @@ void CPU::LdNA(uint8_t opcode) {
 	uint16_t n = (((opcode + 1) / 8) - 9);
 	switch (opcode) {
 	case 0x02:
-		n = _reg->Read16(_reg, BC); //8 cycles
+		//8 cycles
+		n = _reg->Read16(_reg, BC);
 		_cycleCounter += 8;
 		break;
 	case 0x12:
-		n = _reg->Read16(_reg, DE); //8 cycles 
+		//8 cycles 
+		n = _reg->Read16(_reg, DE);
 		_cycleCounter += 8;
 		break;
 	case 0x77:
-		n = _reg->Read16(_reg, HL); //8 cycles
+		//8 cycles
+		n = _reg->Read16(_reg, HL);
 		_cycleCounter += 8;
 		break;
-	case 0xEA: //LS byte first
-		n = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC)); //16 cycles
+	case 0xEA:
+		//LS byte first
+		//16 cycles
+		n = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
 		n = ByteSwap(n);
 		_cycleCounter += 16;
 		_reg->array[PC] +=2;
 		break;
 	}
-	_mmu->WriteMemory8(_mmu, n, _reg->a); //4 cycles
+
+	//4 cycles
+	_mmu->WriteMemory8(_mmu, n, _reg->a);
 	_cycleCounter += 4;
 }
 
@@ -456,10 +467,16 @@ void CPU::LdSpHl(uint8_t opcode) {
 //LDHLSPn Put SP + n effective address into HL. [12 cycles]
 void CPU::LdHlSpn(uint8_t opcode) {
 	uint8_t value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write16(_reg, HL, _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, SP) + value));
+	_reg->Write16(_reg, HL, _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, SP) + value)); // TODO_CHATGPT (WANTS VALUE SIGNED. static_cast<int8_t>(value))
 	//Set flags
 	_flags->SetZeroAtMask(FLAG_Z);
 	_flags->SetZeroAtMask(FLAG_N);
+
+	//TODO_CHATGPT
+	//((_reg->Read16(_reg, SP) & 0xFF) + (value & 0xFF)) > 0xFF ? _flags->SetOneAtMask(FLAG_H) : _flags->SetZeroAtMask(FLAG_H);
+	//(((_reg->Read16(_reg, SP) & 0xFFF) + (value & 0xFFF)) > 0xFFF) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C);
+
+	//Original
 	(_reg->Read16(_reg, SP) + value) > 0xFF ? _flags->SetOneAtMask(FLAG_H): _flags->SetZeroAtMask(FLAG_H); //TODO: Check condition
 	(((_reg->Read16(_reg, SP) & 0xF) + (value & 0xF)) > 0xF) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //TODO: Check condition
 	_cycleCounter += 12;
@@ -487,8 +504,16 @@ void CPU::PopNn(uint8_t opcode) {
 	uint16_t value = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, SP));
 	_reg->Write16(_reg, (uint16_t)((int)floor(opcode / 8) - 24), value);
 	_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) + 2);
+
+	if (opcode == 0xF1) {
+		// Set flags from the low byte of the popped value
+		_flags->SetFlag(FLAG_Z, value & 0x80);
+		_flags->SetFlag(FLAG_N, value & 0x40);
+		_flags->SetFlag(FLAG_H, value & 0x20);
+		_flags->SetFlag(FLAG_C, value & 0x10);
+	}
+
 	_cycleCounter += 12;
-	//TODO optable shows all flags on condition for 0xF1 - I think this is not true.
 }
 
 //Add n to A.
@@ -516,8 +541,7 @@ void CPU::AddAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, new_value);
 
 	//Set flags
-	if (new_value == 0) { 
-		_flags->SetOneAtMask(FLAG_Z); }
+	_flags->SetFlag(FLAG_Z, (new_value == 0));
 	_flags->SetZeroAtMask(FLAG_N); //Not a subtraction method
 	if ((((original_a & 0xF) + (n & 0xF)) > 0xF)) { 
 		_flags->SetOneAtMask(FLAG_H); }
@@ -551,8 +575,7 @@ void CPU::AdcAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, (_reg->a + new_value));
 
 	//Set flags
-	if ((new_value) == 0) { 
-		_flags->SetOneAtMask(FLAG_Z); }
+	_flags->SetFlag(FLAG_Z, (new_value == 0));
 	_flags->SetZeroAtMask(FLAG_N); //Not a subtraction method
 	if ((((original_a & 0xF) + (n & 0xF) + (_flags->GetFlag(FLAG_C)) > 0xF))) { 
 		_flags->SetOneAtMask(FLAG_H); }
@@ -568,7 +591,7 @@ void CPU::SubAN(uint8_t opcode){
 		n = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, HL));
 		_cycleCounter += 8;
 	}
-	else if (opcode == 0xCE) { //edge case [8 cycles]
+	else if (opcode == 0xD6) { //edge case [8 cycles]
 		n = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, SP));
 		_cycleCounter += 8;
 		_reg->array[PC]++;
@@ -586,20 +609,12 @@ void CPU::SubAN(uint8_t opcode){
 	_reg->Write8(_reg, A, (uint8_t)new_value);
 
 	//Set flags
-	if (opcode == 0x9F) { //A,A edge case [4 cycles]
-		_flags->SetOneAtMask(FLAG_Z);
-		_flags->SetOneAtMask(FLAG_N);
-		_flags->SetZeroAtMask(FLAG_H);
-		_flags->SetZeroAtMask(FLAG_C);
+	_flags->SetFlag(FLAG_Z, (new_value == 0));
+	_flags->SetOneAtMask(FLAG_N);
+	if (((original_a & 0xF) < (n & 0xF))) {
+		_flags->SetOneAtMask(FLAG_H);
 	}
-	else {
-		if ((new_value == 0)) {
-			_flags->SetOneAtMask(FLAG_Z);
-		}
-		_flags->SetOneAtMask(FLAG_N);
-		if (((original_a & 0xF) < (n & 0xF))) {
-			_flags->SetOneAtMask(FLAG_H);
-		}
+	if (opcode != 0x9F) { //A,A edge case [4 cycles]
 		if ((new_value < 0)) { //TODO is this set if no borrow?
 			_flags->SetOneAtMask(FLAG_C);
 		}
@@ -631,9 +646,7 @@ void CPU::SbcAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, (uint8_t)new_value);
 
 	//Set flags
-	if ((new_value == 0)) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (new_value == 0));
 	_flags->SetOneAtMask(FLAG_N);
 	if (((original_a & 0xF) < ((n + _flags->GetFlag(FLAG_C)) & 0xF))) {
 		_flags->SetOneAtMask(FLAG_H);
@@ -736,9 +749,7 @@ void CPU::XorAN(uint8_t opcode) {
 	_reg->Write8(_reg, A, value);
 
 	//Set flags
-	if (value == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (value == 0));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 	_flags->SetZeroAtMask(FLAG_C);
@@ -791,6 +802,7 @@ void CPU::CpaN(uint8_t opcode) {
 void CPU::IncN(uint8_t opcode) {
 	uint8_t n = (opcode - 4) / 8;
 	uint8_t value;
+
 	if (opcode == 0x34) { // edge case [12 cycles]
 		n = HL;
 		value = _mmu->ReadMemory8(_mmu, _reg->Read16(_reg, n));
@@ -798,20 +810,21 @@ void CPU::IncN(uint8_t opcode) {
 	}
 	else if (opcode == 0x3C) { // edge case [4 cycles]
 		n = A;
-		value = _reg->Read8(_reg, n); //duplicate below i know, but easy read
+		value = _reg->Read8(_reg, n);
 		_cycleCounter += 4;
 	}
 	else { // [4 cycles] 
 		value = _reg->Read8(_reg, n);
 		_cycleCounter += 4;
 	}
+
 	value++; //Increment value
 	_reg->Write8(_reg, n, value);
+
 	//Set flags
-	if (value == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (value == 0));
 	_flags->SetZeroAtMask(FLAG_N);
+	//if ((value & 0xF) > 0){ // TODO_CHATGPT
 	if ((value & 0xF) > 0xF){
 		_flags->SetOneAtMask(FLAG_H);
 	}
@@ -839,12 +852,11 @@ void CPU::DecN(uint8_t opcode) {
 	value--;
 	_reg->Write8(_reg, n, value);
 	//Set flags
-	if (value == 0) { 
-		_flags->SetOneAtMask(FLAG_Z); 
-	}
+	_flags->SetFlag(FLAG_Z, (value == 0));
 	_flags->SetOneAtMask(FLAG_N);
+	//if (((value & 0xF) > 0)) { // TODO_CHATGPT
 	if (((value & 0xF) == 0xF)) {
-		_flags->SetOneAtMask(FLAG_H); //Not sure if this is correct
+		_flags->SetOneAtMask(FLAG_H);
 	}
 	//FLAG_C not affected
 }
@@ -856,6 +868,7 @@ void CPU::AddHlN16(uint8_t opcode) {
 	std::cout << "ADD (" << _reg->labels16[n] << ") to HL";
 	uint16_t n_value = _reg->Read16(_reg, n);
 	_reg->Write16(_reg, HL, hl_value + n_value);
+
 	//Set flags
 	//FLAG_Z not affected
 	_flags->SetZeroAtMask(FLAG_N);
@@ -864,6 +877,7 @@ void CPU::AddHlN16(uint8_t opcode) {
 	// if hl_value is 0x16: 0000000000010110
 	// bitwise AND &        0000000000000110 (only 1 if both bits are 1)
 	if ((hl_value & 0xF) + (n_value & 0xF) > 0xF) {
+	//if ((hl_value & 0xF) + (n_value & 0xF) > 0) { // TODO_CHATGPT
 		_flags->SetOneAtMask(FLAG_H);
 	}
 
@@ -1093,6 +1107,7 @@ void CPU::SwapN(uint8_t cb_opcode) {
 		n_value = _reg->Read8(_reg, cb_opcode - 30);
 	}
 	uint8_t result = ((n_value & 0xF) && 15) || (((n_value & 15) & 0xF) >> 4); //Do the switcharoo
+	//uint8_t result = ((n_value & 0xF) << 4) | ((n_value & 0xF0) >> 4); // TODO_CHATGPT
 	if (cb_opcode == 0x36) { //(HL) edge case [16 cycles]
 		_mmu->WriteMemory8(_mmu, _reg->Read8(_reg, HL), result);
 		_cycleCounter += 16;
@@ -1106,9 +1121,7 @@ void CPU::SwapN(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	//Set flags
-	if (result == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (result == 0));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 	_flags->SetZeroAtMask(FLAG_C);
@@ -1128,6 +1141,7 @@ void CPU::Daa() {
 	}
 	else {
 		//if the least significant four bits of A contain a non - BCD digit(i.e.it is greater than 9) or the H flag is set,
+		//if ((_reg->a & 0x0F) > 9 || _flags->GetFlag(FLAG_H) == 1) { TODO_CHATGPT
 		if ((_reg->a && 15) > 9 || _flags->GetFlag(FLAG_H) == 1) {
 			//then $06 is added to the register.
 			a_value += 0x06;
@@ -1142,9 +1156,7 @@ void CPU::Daa() {
 	_reg->Write8(_reg, A, a_value);
 
 	//Set flags
-	if (a_value == 0) {
-		_flags->SetZeroAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (a_value == 0));
 	//FLAG_N Not affected
 	_flags->SetZeroAtMask(FLAG_H);
 	(a_value > 0xFF) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C);
@@ -1168,7 +1180,7 @@ void CPU::Ccf() {
 	//FLAG_Z Not affected
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
-	_flags->SetBitFlipAtMask(FLAG_C); //TODO Is this correct?
+	_flags->SetBitFlipAtMask(FLAG_C);
 	_cycleCounter += 4;
 }
 
@@ -1237,7 +1249,7 @@ void CPU::Rlca() {
 	_reg->Write8(_reg, A, result);
 
 	//Set remaining flags
-	_flags->SetOneAtMask(FLAG_Z);
+	_flags->SetZeroAtMask(FLAG_Z);
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 	_cycleCounter += 4;
@@ -1253,9 +1265,7 @@ void CPU::Rla() {
 	_reg->Write8(_reg, A, result);
 	
 	//Set remaining flags
-	if (result == 0) {
-		_flags->SetOneAtMask(FLAG_Z); //TODO check if this should be reset instead of condition
-	}
+	_flags->SetZeroAtMask(FLAG_Z);
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 	_cycleCounter += 4;
@@ -1264,6 +1274,7 @@ void CPU::Rla() {
 //Rotate A right, old bit 0 in carry flag [4 cycles]
 // p100
 void CPU::Rrca() {
+	//(_reg->a & 1) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); // TODO_CHATGPT
 	(_reg->a & 0) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
 	uint8_t carry = _flags->GetFlag(FLAG_C);
 	uint8_t result = (_reg->a >> 1) | (carry << 7);
@@ -1280,6 +1291,7 @@ void CPU::Rrca() {
 //Rotate A right through carry flag [4 cycles]
 void CPU::Rra() {
 	uint8_t carry = _flags->GetFlag(FLAG_C);
+	//(_reg->a & 1) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); // TODO_CHATGPT
 	(_reg->a & 0) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
 	uint8_t result = (_reg->a >> 1) | (carry << 7);
 
@@ -1305,6 +1317,7 @@ void CPU::RlcN(uint8_t cb_opcode) {
 		n_value = _reg->Read8(_reg, cb_opcode);
 	}
 	(n_value & 7) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
+	//(n_value & 0x80) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); // Use old bit 7 as carry, TODO_CHATGPT
 	uint8_t carry = _flags->GetFlag(FLAG_C);
 	uint8_t result = (n_value << 1) | (carry & 7);
 	if (cb_opcode == 0x06) { // [16 cycles]
@@ -1321,9 +1334,7 @@ void CPU::RlcN(uint8_t cb_opcode) {
 	}
 	
 	//Set remaining flags
-	if (result == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (result == 0));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 }
@@ -1342,6 +1353,7 @@ void CPU::RlN(uint8_t cb_opcode) {
 	}
 	uint8_t carry = _flags->GetFlag(FLAG_C);
 	(n_value & 7) ? _flags->SetOneAtMask(FLAG_C) : _flags->SetZeroAtMask(FLAG_C); //Don't use old carry flag
+	// TODO_CHATGPT? SEE ABOVE
 	uint8_t result = (n_value << 1) | carry;
 	if (cb_opcode == 0x16) { // [16 cycles]
 		_mmu->WriteMemory8(_mmu, _reg->Read16(_reg, HL), result);
@@ -1357,9 +1369,7 @@ void CPU::RlN(uint8_t cb_opcode) {
 	}
 
 	//Set remaining flags
-	if (result == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (result == 0));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 }
@@ -1393,9 +1403,7 @@ void CPU::RrcN(uint8_t cb_opcode) {
 	}
 
 	//Set remaining flags
-	if (result == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (result == 0));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 }
@@ -1429,9 +1437,7 @@ void CPU::RrN(uint8_t cb_opcode) {
 	}
 
 	//Set remaining flags
-	if (result == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (result == 0));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 }
@@ -1465,9 +1471,7 @@ void CPU::SlaN(uint8_t cb_opcode) {
 	}
 	
 	//Set remaining flags
-	if (result == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (result == 0));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 }
@@ -1501,9 +1505,7 @@ void CPU::SraN(uint8_t cb_opcode) {
 	}
 
 	//Set remaining flags
-	if (result == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (result == 0));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 }
@@ -1537,9 +1539,7 @@ void CPU::SrlN(uint8_t cb_opcode) {
 	}
 
 	//Set remaining flags
-	if (result == 0) {
-		_flags->SetOneAtMask(FLAG_Z);
-	}
+	_flags->SetFlag(FLAG_Z, (result == 0));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetZeroAtMask(FLAG_H);
 }
@@ -1561,7 +1561,7 @@ void CPU::Bit0(uint8_t cb_opcode) {
 	}
 
 	//Set flags
-	(test & 1) ?  _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetFlag(FLAG_Z, !(test & 1));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetOneAtMask(FLAG_H);
 	//Flag_C not affected
@@ -1583,7 +1583,7 @@ void CPU::Bit1(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	//Set flags
-	(test & 2) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetFlag(FLAG_Z, !(test & 2));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetOneAtMask(FLAG_H);
 	//Flag_C not affected
@@ -1605,7 +1605,7 @@ void CPU::Bit2(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	//Set flags
-	(test & 3) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetFlag(FLAG_Z, !(test & 3));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetOneAtMask(FLAG_H);
 	//Flag_C not affected
@@ -1627,7 +1627,7 @@ void CPU::Bit3(uint8_t cb_opcode) {
 		_cycleCounter += 8;
 	}
 	//Set flags
-	(test & 4) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetFlag(FLAG_Z, !(test & 4));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetOneAtMask(FLAG_H);
 	//Flag_C not affected
@@ -1650,7 +1650,7 @@ void CPU::Bit4(uint8_t cb_opcode) {
 	}
 
 	//Set flags
-	(test & 5) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetFlag(FLAG_Z, !(test & 5));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetOneAtMask(FLAG_H);
 	//Flag_C not affected
@@ -1673,7 +1673,7 @@ void CPU::Bit5(uint8_t cb_opcode) {
 	}
 
 	//Set flags
-	(test & 6) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetFlag(FLAG_Z, !(test & 6));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetOneAtMask(FLAG_H);
 	//Flag_C not affected
@@ -1696,7 +1696,7 @@ void CPU::Bit6(uint8_t cb_opcode) {
 	}
 
 	//Set flags
-	(test & 7) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetFlag(FLAG_Z, !(test & 7));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetOneAtMask(FLAG_H);
 	//Flag_C not affected
@@ -1719,7 +1719,7 @@ void CPU::Bit7(uint8_t cb_opcode) {
 	}
 
 	//Set flags
-	(test & 8) ? _flags->SetZeroAtMask(FLAG_Z) : _flags->SetOneAtMask(FLAG_Z);
+	_flags->SetFlag(FLAG_Z, !(test & 8));
 	_flags->SetZeroAtMask(FLAG_N);
 	_flags->SetOneAtMask(FLAG_H);
 	//Flag_C not affected
@@ -1896,7 +1896,7 @@ void CPU::Set7(uint8_t cb_opcode) {
 		_mmu->WriteMemory8(_mmu, HL, n_value);
 		_cycleCounter += 16;
 	}
-	else if (cb_opcode == 0xF7) { //A [8 cycles] 
+	else if (cb_opcode == 0xFF) { //A [8 cycles]  //Thanks ChatGPT!
 		n_value = _reg->Read8(_reg, A);
 		n_value = (n_value & ~(1 << 7)) | (1 << 7);
 		_reg->Write8(_reg, A, n_value);
@@ -2080,7 +2080,7 @@ void CPU::Res7(uint8_t cb_opcode) {
 		_mmu->WriteMemory8(_mmu, HL, n_value);
 		_cycleCounter += 16;
 	}
-	else if (cb_opcode == 0xB7) { //A [8 cycles] 
+	else if (cb_opcode == 0xBF) { //A [8 cycles] //Thanks ChatCPT!
 		n_value = _reg->Read8(_reg, A);
 		n_value = (n_value & ~(1 << 7));
 		_reg->Write8(_reg, A, n_value);
@@ -2096,8 +2096,10 @@ void CPU::Res7(uint8_t cb_opcode) {
 
 //Jump to address nn [12 cycles]
 void CPU::JpNn() {
+	std::cout << "jumping..";
 	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));
-	_reg->Write16(_reg, PC, ByteSwap(addr));
+	_reg->Write16(_reg, PC, addr); 
+	//_reg->Write16(_reg, PC, ByteSwap(addr)); // TODO_CHATGPT suggests this should little endian, replacing ByteSwap(addr)
 	_cycleCounter += 12;
 	_reg->array[PC]+=2;
 }
@@ -2126,10 +2128,14 @@ void CPU::JpCcNn(uint8_t opcode) {
 		}
 		break;
 	}
+	// If it doesn't jump, we need to step over the jump addresses.
+	_cycleCounter += 12;
+	_reg->array[PC] += 2;
 }
 
 //Jump to address contained in HL [4 cycles]
 void CPU::JpHl() {
+	std::cout << "jumping..";
 	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, HL));
 	_reg->Write16(_reg, PC, addr);
 	_cycleCounter += 4;
@@ -2138,51 +2144,55 @@ void CPU::JpHl() {
 //Add n to current address and jump to it [8 cycles]
 void CPU::JrN() {
 	std::cout << "jumping..";
- 	uint16_t addr = _reg->Read16(_reg, PC) + (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC));
+ 	int8_t addr = _reg->Read16(_reg, PC) + (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC)) + 0x01;
 	_reg->Write16(_reg, PC, addr); // TODO was +1
+
+	//TODO_CHATGPT DEFINITELY WRONG HERE
+	//int8_t offset = (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC) + 1); // Thanks ChatGPT, TODO looks dodge.
+	//_reg->Write16(_reg, PC, _reg->Read16(_reg, PC) + offset + 2);
+	
 	_cycleCounter += 8;
-	_reg->array[PC]++;
 }
 
 //if following condition is true then add n to current  address and jump to it
 // P
 void CPU::JrCcN(uint8_t opcode) {
-	uint16_t addr = _reg->Read16(_reg, PC) + (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC)); //debug print only
+	int8_t addr = _reg->Read16(_reg, PC) + (int8_t)_mmu->ReadMemory8(_mmu, _reg->Read16(_reg, PC)) + 0x01; //debug print only
 	switch (opcode) {
 	case 0x20:
-		std::cout << "JR NZ" << ", Addr_" << addr << " (Z=" << (bool)_flags->GetFlag(FLAG_Z) << ")";
+		std::cout << "JR NZ" << ", Addr_" << addr << " (Z=" << (bool)_flags->GetFlag(FLAG_Z) << ") ";
 		if (_flags->GetFlag(FLAG_Z) == 0) {
 			return JrN();
 		}
 		break;
 	case 0x28:
-		std::cout << "JR Z" << ", Addr_" << addr << " (Z=" << (bool)_flags->GetFlag(FLAG_Z) << ")";
+		std::cout << "JR Z" << ", Addr_" << addr << " (Z=" << (bool)_flags->GetFlag(FLAG_Z) << ") ";
 		if (_flags->GetFlag(FLAG_Z) == 1) {
 			return JrN();
 		}
 		break;
 	case 0x30:
-		std::cout << "JR NC" << ", Addr_" << addr << " (C=" << (bool)_flags->GetFlag(FLAG_C) << ")";
+		std::cout << "JR NC" << ", Addr_" << addr << " (C=" << (bool)_flags->GetFlag(FLAG_C) << ") ";
 		if (_flags->GetFlag(FLAG_C) == 0) {
 			return JrN();
 		}
 		break;
 	case 0x38:
-		std::cout << "JR C" << ", Addr_" << addr << " (C=" << (bool)_flags->GetFlag(FLAG_C) << ")";
+		std::cout << "JR C" << ", Addr_" << addr << " (C=" << (bool)_flags->GetFlag(FLAG_C) << ") ";
 		if (_flags->GetFlag(FLAG_C) == 1) {
 			return JrN();
 		}
 		break;
 	}
-	_cycleCounter += 8;
+	_cycleCounter += 8; //TODO Is this really 8, if it didn't do any operation?
 	_reg->array[PC]++;
 }
 
 //Push address of next instruction onto stack and then jump to address nn. [12 cycles]
 void CPU::CallNn() {
 	uint16_t addr = _mmu->ReadMemory16(_mmu, _reg->Read16(_reg, PC));	
-	_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2); //TODO WHY AM I DOING THIS?
-	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, SP), ByteSwap(addr));
+	_reg->Write16(_reg, SP, _reg->Read16(_reg, SP) - 2); // ChatGPT says: Decrement SP by 2 to point to the next empty stack location
+	_mmu->WriteMemory16(_mmu, _reg->Read16(_reg, SP), ByteSwap(addr)); // ChatGPT says: The ByteSwap function is used to swap the bytes of the return address because the Game Boy CPU is little-endian
 	_cycleCounter += 12;
 	_reg->array[PC] += 2;
 }

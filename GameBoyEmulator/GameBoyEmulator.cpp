@@ -2,11 +2,16 @@
 //
 
 #include <iostream>
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 #include "CPU.h"
 constexpr auto BIOS_FILE_PATH = "dmg_boot.bin";
 constexpr auto CARTRIDGE_FILE_PATH = "Tetris.gb"; //Tetris is used as it doesnt require MBC
 constexpr auto BIOS_SKIP = false;
+constexpr auto POLLING_DELAY = 1; //150
 
 int main()
 {
@@ -27,7 +32,12 @@ int main()
         reg->array[PC]++; //Next value
         cpu->RunInstruction(opcode);
         std::cout << std::endl;
-        Sleep(150);
+        //sleep:
+        #ifdef _WIN32
+        Sleep(POLLING_DELAY);
+        #else
+        usleep(POLLING_DELAY*1000);
+        #endif
     } while (reg->Read16(reg, PC) != 0x0100);   //while not the end of bios
 
     mmu->Destroy(mmu);
