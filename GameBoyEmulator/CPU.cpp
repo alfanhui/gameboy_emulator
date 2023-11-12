@@ -1,5 +1,6 @@
 #include <bit>
 #include <bitset>
+#include <cmath>
 #include <iostream>
 #include "CPU.h"
 
@@ -302,7 +303,7 @@ void CPU::LdR1R2(uint8_t opcode) {
 		return;
 	}
 	float r = (opcode / 8.0f) - 8.0f;
-	uint8_t r1_orig = (uint8_t)floor(r);
+	uint8_t r1_orig = (uint8_t)std::floor(r);
 	uint8_t r2_orig = (uint8_t)((fmod(r, 8.0f) - (float)r1_orig) / 0.125f);
 	uint8_t r1 = r1_orig;
 	uint8_t r2 = r2_orig;
@@ -502,7 +503,7 @@ void CPU::LdNnSp(uint8_t opcode) {
 
 //Push register pair nn onto stack. Decrement Stack Pointer (SP) twice [16 cycles]
 void CPU::PushNn(uint8_t opcode) {
-	int8_t nn = ((int)floor(opcode / 8) - 24);
+	int8_t nn = ((int)std::floor(opcode / 8) - 24);
 	if (nn == 0x00)
 		std::cout << " (BC)";
 	else if (nn == 0x02)
@@ -520,7 +521,7 @@ void CPU::PushNn(uint8_t opcode) {
 
 //Pop two bytes off stack into register pair nn. Increment Stack Pointer (SP) twice. [12 cycles]
 void CPU::PopNn(uint8_t opcode) {
-	int8_t nn = ((int)floor(opcode / 8) - 24);
+	int8_t nn = ((int)std::floor(opcode / 8) - 24);
 	if (nn == 0x00)
 		std::cout << " (BC)";
 	else if (nn == 0x02)

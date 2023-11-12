@@ -7,9 +7,11 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "*.cpp",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "-lstdc++", //For std::cout, as not using g++
+                "-lm" // For std:fmod, has to be after input file option
             ],
             "options": {
                 "cwd": "${fileDirname}"
