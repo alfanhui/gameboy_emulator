@@ -28,7 +28,8 @@ int main()
     //game loop
     do {
         uint8_t opcode = mmu->ReadMemory8(mmu, reg->Read8(reg, PC));
-        std::cout << "Execute " << (int)reg->Read16(reg, PC) << ": " << std::hex << (int)opcode << " ";
+        //std::cout << "\n0x27 instruction: " << std::hex << (int)mmu->ReadMemory8(mmu, reg->Read8(reg, 27)) << "\n";
+        std::cout << "Execute "  << std::hex << (int)reg->Read16(reg, PC) << ": " << std::hex << (int)opcode << " ";
         reg->array[PC]++; //Next value
         cpu->RunInstruction(opcode);
         std::cout << std::endl;
