@@ -11,7 +11,7 @@
 constexpr auto BIOS_FILE_PATH = "dmg_boot.bin";
 constexpr auto CARTRIDGE_FILE_PATH = "Tetris.gb"; //Tetris is used as it doesnt require MBC
 constexpr auto BIOS_SKIP = false;
-constexpr auto POLLING_DELAY = 1; //150
+constexpr auto POLLING_DELAY = 150;
 
 int main()
 {
